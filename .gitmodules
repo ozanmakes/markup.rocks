@@ -1,0 +1,3 @@
+[submodule "vendor/codemirror"]
+	path = vendor/codemirror
+	url = https://github.com/codemirror/codemirror

@@ -4,8 +4,18 @@ FONTS=static/themes/default/assets/fonts
 
 compile:
 	cd src; ghcjs --make Main.hs -DGHCJS_BROWSER
-	cat static/codemirror.css static/neo.css static/semantic.min.css static/app.css > static/style.css
-	cat static/jquery.js static/codemirror.js static/semantic.min.js static/jsbits.js src/Main.jsexe/all.js > static/app.js
+	cat vendor/codemirror/lib/codemirror.css	\
+			static/neo.css												\
+			static/semantic.min.css								\
+			static/app.css												\
+		> static/style.css
+
+	cat static/jquery.js										\
+			vendor/codemirror/lib/codemirror.js	\
+			static/semantic.min.js							\
+			static/jsbits.js										\
+			src/Main.jsexe/all.js								\
+		> static/app.js
 
 compress:
 	mkdir -p dist/$(FONTS)
