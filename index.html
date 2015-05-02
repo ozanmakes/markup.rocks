@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="description" content="Markup Rocks is a browser based document editor. Sync with Dropbox, Github and Google Drive. 100% Open Source!">
+    <meta name="keywords" content="Markdown, Markup Rocks, Editor, CodeMirror, Github, Open Source, Haskell, GHCJS, Pandoc">
+    <meta name="author" content="Ozan Sener">
+    <link href='http://fonts.googleapis.com/css?family=Droid+Sans+Mono|Source+Sans+Pro:400,400italic,600,600italic' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="/static/style.css">
+  </head>
+  <body id="markuprocks">
+    <div class="ui secondary pointing menu">
+      <div class="active header item">MARKUP ROCKS</div>
+    </div>
+
+    <div class="ui two column padded grid">
+      <div class="left column">
+        <div class="ui piled segment">
+          <div class="ui top left attached label">
+            <div class="ui dropdown compact button">
+              <span class="text">Markdown</span><i class="dropdown icon"></i>
+            </div>
+          </div>
+          <div class="ui top right attached label">
+            <div class="ui icon simple left dropdown compact button">
+              <i class="settings icon"></i>
+            </div>
+          </div>
+          <div class="CodeMirror cm-s-neo CodeMirror-wrap">
+            <div class="CodeMirror-lines">
+              <div style="position: relative; outline: medium none;">
+                <div style="" class="CodeMirror-code">
+                  <pre class=""><span><span class="cm-header cm-header-1"># Loading</span></span></pre>
+                  <pre><span><span class="cm-em">*(2.6 MB total)*</span></span></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="right column">
+        <div class="ui piled segment">
+          <div class="ui top left attached label">
+            <div class="ui dropdown compact button">
+              <span class="text">Preview</span><i class="dropdown icon"></i>
+            </div>
+          </div>
+          <div class="ui top right attached label">
+            <div class="ui icon simple left dropdown compact button">
+              <i class="settings icon"></i>
+              <div class="menu">
+                <div class="header">Result Settings</div>
+              </div>
+            </div>
+          </div>
+          <div class="output">
+            <div class="ui active text large loader">
+              <b>Loading</b>
+              <p><em>(2.4 MB total)</em></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+     (function () {
+       var script = document.createElement('script');
+       script.src = "/static/app.js";
+       document.head.appendChild(script);
+     })();
+    </script>
+  </body>
+</html>

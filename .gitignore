@@ -1,0 +1,10 @@
+/dist/
+/static/all.js
+*.js_dyn_hi
+*.js_dyn_o
+*.js_hi
+*.js_o
+*.jsexe
+TAGS
+/static/style.css
+/static/app.js

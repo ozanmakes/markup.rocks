@@ -1,0 +1,448 @@
+body {
+  padding: 7px;
+}
+
+textarea.input, .CodeMirror.cm-s-neo {
+  width: 100%;
+  height: 97%;
+  margin-top: 2.0em;
+}
+
+.ui.segment {
+  width: 100%;
+  height: 98%;
+
+}
+
+.output {
+  width: 100%;
+  height: 97%;
+  margin-top: 2.0em;
+}
+
+.preview {
+  overflow-y: scroll;
+  word-wrap: break-word;
+  height: 100%;
+  font-size: 16px;
+
+}
+
+.output > textarea {
+  width: 100%;
+  height: 100%;
+}
+
+.ui.left.dropdown > .menu {
+  margin: 0px 1em 0px 0px;
+  top: 0px;
+  left: auto;
+  right: -51%;
+}
+
+.ui.simple.dropdown.compact.button {
+  margin: 0px;
+}
+
+code, .CodeMirror {
+  font-family: "Droid Sans Mono", monospace;
+}
+
+.ui.top.attached.label {
+  background-color: transparent;
+}
+
+/*-------------------
+        Grid
+--------------------*/
+
+#markuprocks .pusher,
+#markuprocks .grid,
+#markuprocks .grid > .column {
+  height: 96%;
+}
+
+
+/*******************************
+            Table
+*******************************/
+
+
+.preview table {
+  width: 100%;
+  background: #ffffff;
+  margin: 1em 0em;
+  border: 1px solid #d0d0d0;
+  box-shadow: none;
+  border-radius: 0.25rem;
+  color: rgba(0, 0, 0, 0.8);
+  border-collapse: separate;
+  border-spacing: 0px;
+  width: auto;
+}
+.preview table:first-child {
+  margin-top: 0em;
+}
+.preview table:last-child {
+  margin-bottom: 0em;
+}
+
+/* Table Content */
+.preview table th,
+.preview table td {
+  -webkit-transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+          transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Headers */
+.preview table thead {
+  box-shadow: none;
+}
+.preview table thead th {
+  cursor: auto;
+  background: #f0f0f0;
+  text-align: left;
+  color: rgba(0, 0, 0, 0.8);
+  padding: 0.7em 0.8em;
+  vertical-align: middle;
+  font-style: none;
+  font-weight: bold;
+  text-transform: none;
+  border-bottom: 1px solid #d4d4d5;
+  border-left: none;
+}
+.preview table thead tr > th:first-child {
+  border-left: none;
+}
+.preview table thead tr:first-child > th:first-child {
+  border-radius: 0.25rem 0em 0em 0em;
+}
+.preview table thead tr:first-child > th:last-child {
+  border-radius: 0em 0.25rem 0em 0em;
+}
+.preview table thead tr:first-child > th:only-child {
+  border-radius: 0.25rem 0.25rem 0em 0em;
+}
+
+/* Footer */
+.preview table tfoot {
+  box-shadow: none;
+}
+.preview table tfoot th {
+  cursor: auto;
+  border-top: 1px solid #d4d4d5;
+  background: #ffffff;
+  text-align: left;
+  color: rgba(0, 0, 0, 0.8);
+  padding: 0.7em 0.8em;
+  vertical-align: middle;
+  font-style: normal;
+  font-weight: normal;
+  text-transform: none;
+}
+.preview table tfoot tr > th:first-child {
+  border-left: none;
+}
+.preview table tfoot tr:first-child > th:first-child {
+  border-radius: 0em 0em 0em 0.25rem;
+}
+.preview table tfoot tr:first-child > th:last-child {
+  border-radius: 0em 0em 0.25rem 0em;
+}
+.preview table tfoot tr:first-child > th:only-child {
+  border-radius: 0em 0em 0.25rem 0.25rem;
+}
+
+/* Table Row */
+.preview table tr td {
+  border-top: 1px solid #d4d4d5;
+}
+.preview table tr:first-child td {
+  border-top: none;
+}
+
+/* Table Cells */
+.preview table td {
+  padding: 0.7em 0.8em;
+  text-align: left;
+  vertical-align: middle;
+}
+
+/* Icons */
+.preview table > .icon {
+  vertical-align: baseline;
+}
+.preview table > .icon:only-child {
+  margin: 0em;
+}
+
+/* Responsive */
+@media only screen and (max-width: 767px) {
+  table:not(.unstackable) {
+    width: 100%;
+  }
+  .preview table:not(.unstackable) tbody,
+  .preview table:not(.unstackable) tr,
+  .preview table:not(.unstackable) tr > th,
+  .preview table:not(.unstackable) tr > td {
+    width: auto !important;
+    display: block !important;
+  }
+  .preview table:not(.unstackable) {
+    padding: 0em;
+  }
+  .preview table:not(.unstackable) thead {
+    display: block;
+  }
+  .preview table:not(.unstackable) tfoot {
+    display: block;
+  }
+  .preview table:not(.unstackable) tr > th,
+  .preview table:not(.unstackable) tr > td {
+    background: none;
+    border: none !important;
+    padding: 0.25em 0.75em;
+    box-shadow: none !important;
+  }
+  .preview table:not(.unstackable) th:first-child,
+  .preview table:not(.unstackable) td:first-child {
+    font-weight: bold;
+    padding-top: 1em;
+  }
+  .preview table:not(.unstackable) th:last-child,
+  .preview table:not(.unstackable) td:last-child {
+    box-shadow: 0px -1px 0px 0px rgba(0, 0, 0, 0.1) inset !important;
+    padding-bottom: 1em;
+  }
+}
+
+/*******************************
+            Divider
+*******************************/
+
+hr {
+  margin: 1rem 0rem;
+  line-height: 1;
+  height: 0em;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: rgba(0, 0, 0, 0.85);
+  -webkit-user-select: none;
+     -moz-user-select: none;
+      -ms-user-select: none;
+          user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/*******************************
+            Message
+*******************************/
+
+blockquote {
+  position: relative;
+  min-height: 1em;
+  margin: 1em 0em;
+  background: #f3f3f3;
+  padding: 7px 15px;
+  line-height: 1.33;
+  color: rgba(0, 0, 0, 0.8);
+  border-left: 7px solid rgba(128, 128, 128, 0.075)
+}
+blockquote:first-child {
+  margin-top: 0em;
+}
+blockquote:last-child {
+  margin-bottom: 0em;
+}
+
+/*--------------
+     Content
+---------------*/
+
+/* Paragraph */
+blockquote p {
+  opacity: 0.85;
+  margin: 0.75em 0em;
+}
+blockquote p:first-child {
+  margin-top: 0em;
+}
+blockquote p:last-child {
+  margin-bottom: 0em;
+}
+
+/* List */
+blockquote ul {
+  opacity: 0.85;
+  list-style-position: inside;
+  margin: 0.5em 0em 0em;
+  padding: 0em;
+}
+blockquote ul:first-child {
+  margin-top: 0em;
+}
+blockquote ul:last-child {
+  margin-bottom: 0em;
+}
+blockquote ul li {
+  position: relative;
+  list-style-type: none;
+  margin: 0em 0em 0.3em 1em;
+  padding: 0em;
+}
+blockquote ul li:before {
+  position: absolute;
+  content: '•';
+  height: 100%;
+  vertical-align: baseline;
+}
+blockquote ul li:last-child {
+  margin-bottom: 0em;
+}
+
+/*******************************
+            Code
+*******************************/
+
+.preview p > code {
+  position: relative;
+  min-height: 1em;
+  margin: 1em 0em;
+  background: #f3f3f3;
+  padding: 1px 5px;
+  line-height: 1.33;
+  color: rgba(0, 0, 0, 0.8);
+}
+
+.preview pre {
+  position: relative;
+  min-height: 1em;
+  margin: 1em 0em;
+  background: -webkit-linear-gradient(rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05)) #fefefe;
+  background: linear-gradient(rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.05)) #fefefe;
+  padding: 15px 15px;
+  line-height: 1.33;
+  color: rgba(0, 0, 0, 0.8);
+  border-radius: 0.2857rem;
+  box-shadow: 0px 0px 0px 1px rgba(255, 255, 255, 0.3) inset, 0px 0px 0px 1px rgba(0, 0, 0, 0.2) inset;
+}
+/*******************************
+            List
+*******************************/
+
+ul, ol {
+  list-style-type: none;
+  margin: 1em 0em;
+  padding: 0em 0em;
+}
+ul:first-child, ol:first-child {
+  margin-top: 0em;
+  padding-top: 0.5em;
+}
+ul:last-child, ol:last-child {
+  margin-bottom: 0em;
+  padding-bottom: 0em;
+}
+
+
+/*******************************
+            Content
+*******************************/
+
+
+/* List Item */
+ul li, ol li {
+  display: list-item;
+  table-layout: fixed;
+  list-style-type: none;
+  list-style-position: outside;
+  padding: 0.3em 0em;
+  line-height: 1.2;
+}
+ul > li:first-child:after,
+ol > li:first-child:after {
+  content: '';
+  display: block;
+  height: 0;
+  clear: both;
+  visibility: hidden;
+}
+ul li:first-child,
+ol li:first-child {
+  padding-top: 0em;
+}
+ul li:last-child,
+ol li:last-child {
+  padding-bottom: 0em;
+}
+
+/* Child List */
+ul ul,
+ol ol {
+  clear: both;
+  margin: 0em;
+  padding: 0.75em 0em 0.25em 0.5em;
+}
+
+/*-------------------
+      Bulleted
+--------------------*/
+
+ul {
+  margin-left: 2rem;
+}
+ul li {
+  position: relative;
+}
+ul li:before {
+  position: absolute;
+  top: auto;
+  left: auto;
+  margin-left: -1rem;
+  content: '•';
+  opacity: 1;
+  color: rgba(0, 0, 0, 0.8);
+  vertical-align: top;
+}
+ul ul {
+  padding-left: 1rem;
+}
+
+
+/*-------------------
+       Ordered
+--------------------*/
+
+ol,
+ol ol {
+  counter-reset: ordered;
+  margin-left: 2rem;
+  list-style-type: none;
+}
+ol li {
+  list-style-type: none;
+  position: relative;
+}
+ol li:before {
+  position: absolute;
+  top: auto;
+  left: auto;
+  margin-left: -1.25rem;
+  counter-increment: ordered;
+  content: counters(ordered, "") ". ";
+  text-align: right;
+  color: rgba(0, 0, 0, 0.8);
+  vertical-align: middle;
+  opacity: 0.8;
+}
+
+/* Child Lists */
+ol ol {
+  margin-left: 1em;
+}
+ol ol li:before {
+  margin-left: -2em;
+}
