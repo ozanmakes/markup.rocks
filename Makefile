@@ -2,6 +2,24 @@ GZIP=zopfli -c -i1000
 # GZIP=gzip -c
 FONTS=static/themes/default/assets/fonts
 
+JS = vendor/codemirror/lib/codemirror.js							\
+		 vendor/codemirror/addon/mode/overlay.js					\
+		 vendor/codemirror/mode/meta.js										\
+		 vendor/codemirror/mode/xml/xml.js								\
+		 vendor/codemirror/mode/markdown/markdown.js			\
+		 vendor/codemirror/mode/gfm/gfm.js								\
+		 vendor/codemirror/mode/python/python.js					\
+		 vendor/codemirror/mode/stex/stex.js							\
+		 vendor/codemirror/mode/rst/rst.js								\
+		 vendor/codemirror/mode/javascript/javascript.js	\
+		 vendor/codemirror/mode/css/css.js								\
+		 vendor/codemirror/mode/textile/textile.js				\
+		 vendor/codemirror/mode/htmlmixed/htmlmixed.js		\
+		 static/highlight.pack.js													\
+		 static/jquery.js																	\
+		 static/semantic.min.js														\
+		 static/jsbits.js
+
 compile:
 	cd src; ghcjs --make Main.hs -DGHCJS_BROWSER
 	cat vendor/codemirror/lib/codemirror.css	\
@@ -11,30 +29,12 @@ compile:
 			static/app.css												\
 		> static/style.css
 
-	cat vendor/codemirror/lib/codemirror.js							\
-			vendor/codemirror/addon/mode/overlay.js					\
-			vendor/codemirror/mode/meta.js									\
-			vendor/codemirror/mode/xml/xml.js								\
-			vendor/codemirror/mode/markdown/markdown.js			\
-			vendor/codemirror/mode/gfm/gfm.js								\
-			vendor/codemirror/mode/python/python.js					\
-			vendor/codemirror/mode/stex/stex.js							\
-			vendor/codemirror/mode/rst/rst.js								\
-			vendor/codemirror/mode/javascript/javascript.js	\
-			vendor/codemirror/mode/css/css.js								\
-			vendor/codemirror/mode/textile/textile.js				\
-			vendor/codemirror/mode/htmlmixed/htmlmixed.js		\
-			static/highlight.pack.js                        \
-			static/jquery.js																\
-			static/semantic.min.js													\
-			static/jsbits.js																\
-			src/Main.jsexe/all.js														\
-		> static/app.js
+	cat $(JS) src/Main.jsexe/all.js > static/app.js
 
 compress:
 	mkdir -p dist/$(FONTS)
 	closure-compiler --js src/Main.jsexe/all.js --js_output_file static/all.min.js
-	cat static/jquery.js static/codemirror.js static/semantic.min.js static/jsbits.js static/all.min.js > static/app.js
+	cat $(JS) static/all.min.js > static/app.js
 
 	$(GZIP) index.html > dist/index.html
 	$(GZIP) static/style.css > dist/static/style.css
