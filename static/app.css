@@ -2,10 +2,13 @@ body {
   padding: 7px;
 }
 
-textarea.input, .CodeMirror.cm-s-neo {
+.CodeMirror.cm-s-neo {
+  margin-top: 28px;
+}
+
+textarea.input, .CodeMirror.cm-s-neo, .output {
   width: 100%;
   height: 97%;
-  margin-top: 2.0em;
 }
 
 .ui.inverted.menu {
@@ -21,12 +24,6 @@ textarea.input, .CodeMirror.cm-s-neo {
 .ui.segment {
   width: 100%;
   height: 100%;
-}
-
-.output {
-  width: 100%;
-  height: 97%;
-  margin-top: 2.0em;
 }
 
 .preview {
@@ -53,8 +50,16 @@ textarea.input, .CodeMirror.cm-s-neo {
   margin: 0px;
 }
 
-code, .CodeMirror {
+code, .CodeMirror, textarea {
   font-family: "Droid Sans Mono", monospace;
+}
+
+textarea {
+  line-height:1.4375;
+  border: none;
+  margin-left:-2px;
+  margin-top: 30px;
+  background-color: transparent;
 }
 
 .ui.top.attached.label {
