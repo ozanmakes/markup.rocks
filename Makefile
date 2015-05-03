@@ -2,33 +2,32 @@ GZIP=zopfli -c -i1000
 # GZIP=gzip -c
 FONTS=static/themes/default/assets/fonts
 
-JS = vendor/codemirror/lib/codemirror.js							\
-		 vendor/codemirror/addon/mode/overlay.js					\
-		 vendor/codemirror/mode/meta.js										\
-		 vendor/codemirror/mode/xml/xml.js								\
-		 vendor/codemirror/mode/markdown/markdown.js			\
-		 vendor/codemirror/mode/gfm/gfm.js								\
-		 vendor/codemirror/mode/python/python.js					\
-		 vendor/codemirror/mode/stex/stex.js							\
-		 vendor/codemirror/mode/rst/rst.js								\
-		 vendor/codemirror/mode/javascript/javascript.js	\
-		 vendor/codemirror/mode/css/css.js								\
-		 vendor/codemirror/mode/textile/textile.js				\
-		 vendor/codemirror/mode/htmlmixed/htmlmixed.js		\
-		 static/highlight.pack.js													\
-		 static/jquery.js																	\
-		 static/semantic.min.js														\
-		 static/jsbits.js
+JS=vendor/codemirror/lib/codemirror.js							\
+	 vendor/codemirror/addon/mode/overlay.js					\
+	 vendor/codemirror/mode/meta.js										\
+	 vendor/codemirror/mode/xml/xml.js								\
+	 vendor/codemirror/mode/markdown/markdown.js			\
+	 vendor/codemirror/mode/gfm/gfm.js								\
+	 vendor/codemirror/mode/python/python.js					\
+	 vendor/codemirror/mode/stex/stex.js							\
+	 vendor/codemirror/mode/rst/rst.js								\
+	 vendor/codemirror/mode/javascript/javascript.js	\
+	 vendor/codemirror/mode/css/css.js								\
+	 vendor/codemirror/mode/textile/textile.js				\
+	 vendor/codemirror/mode/htmlmixed/htmlmixed.js		\
+	 static/highlight.pack.js													\
+	 static/jquery.js																	\
+	 static/semantic.min.js														\
+	 static/jsbits.js
+
+CSS=vendor/codemirror/lib/codemirror.css	\
+		static/neo.css												\
+		static/hljs-theme.css									\
+		static/semantic.min.css
 
 compile:
 	cd src; ghcjs --make Main.hs -DGHCJS_BROWSER
-	cat vendor/codemirror/lib/codemirror.css	\
-			static/neo.css												\
-			static/hljs-theme.css									\
-			static/semantic.min.css								\
-			static/app.css												\
-		> static/style.css
-
+	cat $(CSS) static/app.css > static/style.css
 	cat $(JS) src/Main.jsexe/all.js > static/app.js
 
 compress:
