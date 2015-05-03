@@ -102,17 +102,10 @@ codeMirror (CodeMirrorConfig initial eCM eLang eSet attrs) =
      performEvent_ $
        fmap (\v ->
                liftIO $
-               do let mode =
-                        case v of
-                          "md" -> "gfm"
-                          "html" -> "htmlmixed"
-                          "textile" -> "textile"
-                          "rst" -> "rst"
-                          _ -> "null"
-                  maybeCodeMirror <- tryTakeMVar mvar
+               do maybeCodeMirror <- tryTakeMVar mvar
                   case maybeCodeMirror of
                     Just cm ->
-                      do setMode cm (toJSString mode)
+                      do setMode cm . toJSString . langToMode $ v
                          putMVar mvar cm
                     Nothing -> return ())
             eLang
@@ -122,7 +115,7 @@ codeMirror (CodeMirrorConfig initial eCM eLang eSet attrs) =
                do maybeCodeMirror <- tryTakeMVar mvar
                   case maybeCodeMirror of
                     Just cm ->
-                      do setContent cm (toJSString v)
+                      do setContent cm . toJSString $ v
                          putMVar mvar cm
                     Nothing ->
                       htmlTextAreaElementSetValue e v)
@@ -134,3 +127,13 @@ codeMirror (CodeMirrorConfig initial eCM eLang eSet attrs) =
        holdDyn initial (leftmost [eSet,eRecv,ev])
      return $
        CodeMirror v
+
+langToMode :: String -> String
+langToMode lang =
+  case lang of
+    "md" -> "gfm"
+    "html" -> "htmlmixed"
+    "textile" -> "textile"
+    "rst" -> "rst"
+    "man" -> "troff"
+    _ -> "null"

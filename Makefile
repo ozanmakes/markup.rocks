@@ -15,6 +15,7 @@ JS=vendor/codemirror/lib/codemirror.js							\
 	 vendor/codemirror/mode/css/css.js								\
 	 vendor/codemirror/mode/textile/textile.js				\
 	 vendor/codemirror/mode/htmlmixed/htmlmixed.js		\
+	 vendor/codemirror/mode/troff/troff.js						\
 	 static/highlight.pack.js													\
 	 static/jquery.js																	\
 	 static/semantic.min.js														\
