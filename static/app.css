@@ -8,10 +8,19 @@ textarea.input, .CodeMirror.cm-s-neo {
   margin-top: 2.0em;
 }
 
+.ui.inverted.menu {
+  background-color: #4B020B;
+  margin-bottom: 11px;
+  cursor: default;
+}
+
+.ui.inverted.menu > .brand.item {
+  font-weight: 700;
+}
+
 .ui.segment {
   width: 100%;
-  height: 98%;
-
+  height: 100%;
 }
 
 .output {
@@ -69,7 +78,7 @@ code {
 #markuprocks .pusher,
 #markuprocks .grid,
 #markuprocks .grid > .column {
-  height: 96%;
+  height: 100%;
 }
 
 

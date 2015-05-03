@@ -46,8 +46,8 @@ JS(highlightCode,"highlightCode()", IO ())
 main :: IO ()
 main =
   mainWidget $
-  do divClass "ui secondary pointing menu" $
-       divClass "active header item" $ text "MARKUP ROCKS"
+  do divClass "ui fixed inverted menu" $
+       divClass "header brand item" (text "markup.rocks")
      divClass "ui two column padded grid" $
        do (readerD,t,exts) <-
             divClass "left column" editor
