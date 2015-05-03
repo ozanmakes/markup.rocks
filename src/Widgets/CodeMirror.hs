@@ -34,7 +34,7 @@ JS(newCodeMirror_, "fromTextArea($1, $2)", HTMLTextAreaElement -> JSFun (JSStrin
 
 JS(toTextArea, "$1['toTextArea']()", CodeMirrorObj -> IO ())
 JS(setMode, "$1['setOption']('mode', $2)", CodeMirrorObj -> JSString -> IO ())
-
+JS(setContent, "$1['setValue']($2)", CodeMirrorObj -> JSString -> IO ())
 
 newCodeMirrorObj :: HTMLTextAreaElement -> (String -> IO ()) -> IO CodeMirrorObj
 newCodeMirrorObj textarea onChange =
@@ -49,6 +49,7 @@ data CodeMirrorConfig t =
   CodeMirrorConfig {_codeMirrorConfig_initialValue :: String
                    ,_codeMirrorConfig_enableCodeMirror :: Event t Bool
                    ,_codeMirrorConfig_changeLang :: Event t String
+                   ,_codeMirrorConfig_setValue :: Event t String
                    ,_codeMirrorConfig_attributes :: Dynamic t (Map String String)}
 
 instance Reflex t => Default (CodeMirrorConfig t) where
@@ -56,6 +57,7 @@ instance Reflex t => Default (CodeMirrorConfig t) where
     CodeMirrorConfig {_codeMirrorConfig_initialValue = ""
                      ,_codeMirrorConfig_enableCodeMirror = never
                      ,_codeMirrorConfig_changeLang = never
+                     ,_codeMirrorConfig_setValue = never
                      ,_codeMirrorConfig_attributes = constDyn mempty}
 
 data CodeMirror t =
@@ -67,7 +69,7 @@ instance HasValue (CodeMirror t) where
 
 codeMirror :: MonadWidget t m
            => CodeMirrorConfig t -> m (CodeMirror t)
-codeMirror (CodeMirrorConfig initial eCM eLang attrs) =
+codeMirror (CodeMirrorConfig initial eCM eLang eSet attrs) =
   do e <-
        liftM castToHTMLTextAreaElement $
        buildEmptyElement "textarea" =<<
@@ -114,9 +116,21 @@ codeMirror (CodeMirrorConfig initial eCM eLang attrs) =
                          putMVar mvar cm
                     Nothing -> return ())
             eLang
+     performEvent_ $
+       fmap (\v ->
+               liftIO $
+               do maybeCodeMirror <- tryTakeMVar mvar
+                  case maybeCodeMirror of
+                    Just cm ->
+                      do setContent cm (toJSString v)
+                         putMVar mvar cm
+                    Nothing ->
+                      htmlTextAreaElementSetValue e v)
+            eSet
      ev <-
        wrapDomEvent e elementOninput $
        liftIO $ htmlTextAreaElementGetValue e
-     v <- holdDyn initial (leftmost [eRecv,ev])
+     v <-
+       holdDyn initial (leftmost [eSet,eRecv,ev])
      return $
        CodeMirror v
