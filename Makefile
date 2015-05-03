@@ -6,6 +6,7 @@ compile:
 	cd src; ghcjs --make Main.hs -DGHCJS_BROWSER
 	cat vendor/codemirror/lib/codemirror.css	\
 			static/neo.css												\
+			static/hljs-theme.css									\
 			static/semantic.min.css								\
 			static/app.css												\
 		> static/style.css
@@ -23,7 +24,8 @@ compile:
 			vendor/codemirror/mode/css/css.js								\
 			vendor/codemirror/mode/textile/textile.js				\
 			vendor/codemirror/mode/htmlmixed/htmlmixed.js		\
-      static/jquery.js																\
+			static/highlight.pack.js                        \
+			static/jquery.js																\
 			static/semantic.min.js													\
 			static/jsbits.js																\
 			src/Main.jsexe/all.js														\

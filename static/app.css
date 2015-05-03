@@ -52,6 +52,16 @@ code, .CodeMirror {
   background-color: transparent;
 }
 
+code.hljs {
+  background-color: transparent;
+  padding: 0;
+  display: inline;
+}
+
+code {
+  font-size: 14px;
+}
+
 /*-------------------
         Grid
 --------------------*/

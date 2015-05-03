@@ -41,6 +41,7 @@ data Component = Reader | Writer
 #endif
 
 JS(getTime,"(new Date())['getTime']()", IO Double)
+JS(highlightCode,"highlightCode()", IO ())
 
 main :: IO ()
 main =
@@ -71,6 +72,8 @@ main =
                elDynHtmlAttr' "div"
                               ("class" =: "output")
                               resultDyn
+               performEvent_ $
+                 fmap (const . liftIO . void . forkIO $ highlightCode) result
                return ()
 
 forceLossy :: (MonadWidget t m,NFData a)

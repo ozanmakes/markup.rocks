@@ -20,4 +20,10 @@
   window.checkboxOnChange = function (el, cb) {
     $(el).dropdown({ onChange: cb });
   };
+
+  window.highlightCode = function () {
+    $('.preview pre code').each(function (i, block) {
+      window.hljs.highlightBlock(block);
+    });
+  };
 })();
