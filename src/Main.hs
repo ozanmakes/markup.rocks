@@ -30,8 +30,8 @@ import           Reflex.Dom
 import           Reflex.Dom.Class
 import           Reflex.Dynamic.TH
 import           Text.Pandoc
-import           Text.Pandoc.Error       (PandocError)
 
+import           Formats
 import           Widgets.CodeMirror
 import           Widgets.Dialog.Location
 import           Widgets.Misc            (icon, iconLinkClass)
@@ -54,8 +54,8 @@ main :: IO ()
 main =
   mainWidget $
   do postGui <- askPostGui
-     (locationModal,locationContents) <- locationDialog
-     (menu,dropboxContents) <-
+     (locationModal,(locationContents,locationExt)) <- locationDialog
+     (menu,(dropboxContents,dropboxExt)) <-
        divClass "ui fixed inverted menu" $
        do divClass "header brand item" (text "markup.rocks")
           elAttr' "div" ("class" =: "ui dropdown item") $
@@ -71,28 +71,22 @@ main =
                       fmap (const . liftIO . void . forkIO $
                             showModal (_el_element locationModal))
                            loc
-                    (dropboxCb,dropboxContents) <- getDropbox
-                    dropboxLink <-
-                      iconLinkClass "dropbox" "Dropbox" "item"
-                    performEvent_ $
-                      fmap (const . liftIO $ dropboxFile dropboxCb) dropboxLink
-                    return dropboxContents
+                    getDropbox
      liftIO $
        enableMenu (_el_element menu)
      divClass "ui two column padded grid" $
        do (dropzone,(readerD,t,exts)) <-
             divClass "left column" $
-
-                        elAttr' "div" ("class" =: "ui piled segment") $
-            editor $
-            leftmost $
-            fmap (fmap snd)
-                 [locationContents,dropboxContents]
+            elAttr' "div" ("class" =: "ui piled segment") $
+            editor (leftmost [locationContents,dropboxContents])
+                   (leftmost [locationExt,dropboxExt])
           divClass "right column" $
             divClass "ui piled segment" $
             do writerD <-
                  divClass "ui top left attached label" $
-                 selection "Preview" "1preview" (constDyn resultFormats)
+                 selection def {_selectionConfig_label = "Preview"
+                               ,_selectionConfig_initialValue = "1preview"
+                               ,_selectionConfig_options = constDyn resultFormats}
                divClass "ui top right attached label" $
                  divClass "ui icon simple left dropdown compact button" $
                  do icon "settings"
@@ -149,11 +143,16 @@ forceLossy e =
 
 editor :: (MonadWidget t m)
        => Event t String
+       -> Event t String
        -> m (Selection t,CodeMirror t,Dynamic t (Set Extension))
-editor eSet =
+editor eSet readerSet =
   do d <-
        divClass "ui top left attached label" $
-       selection "Markdown" "md" (constDyn sourceFormats)
+       selection $
+       SelectionConfig "md"
+                       "Markdown"
+                       (constDyn sourceFormats)
+                       readerSet
      (advancedEditor,exts) <-
        divClass "ui top right attached label" $
        divClass "ui icon simple left dropdown compact button" $
@@ -213,51 +212,6 @@ stringToExtensions Reader "md" =
    ,Set.delete Ext_raw_tex .
     Set.union multimarkdownExtensions)]
 stringToExtensions _ _ = []
-
-sourceFormats :: Map String String
-sourceFormats =
-  Map.fromList
-    [("docbook","DocBook")
-    ,("html","HTML")
-    ,("latex","LaTeX")
-    ,("md","Markdown")
-    ,("mw","MediaWiki")
-    ,("opml","OPML")
-    ,("org","Org")
-    ,("rst","reStructuredText")
-    ,("t2t","txt2tags")
-    ,("textile","Textile")
-    ,("twiki","TWiki")]
-
-stringToReader :: String -> ReaderOptions -> String -> Either PandocError Pandoc
-stringToReader s =
-  case s of
-    "docbook" -> readDocBook
-    "html" -> readHtml
-    "latex" -> readLaTeX
-    "mw" -> readMediaWiki
-    "opml" -> readOPML
-    "org" -> readOrg
-    "rst" -> readRST
-    "t2t" -> readTxt2TagsNoMacros
-    "textile" -> readTextile
-    "twiki" -> readTWiki
-    otherwise -> readMarkdown
-
-resultFormats :: Map String String
-resultFormats =
-  Map.fromList
-    [("1preview","Preview")
-    ,("ascii","AsciiDoc")
-    ,("html","HTML")
-    ,("latex","LaTeX")
-    ,("man","Man")
-    ,("md","Markdown")
-    ,("org","Org")
-    ,("plain","Plaintext")
-    ,("rst","reStructuredText")
-    ,("texinfo","Texinfo")
-    ,("textile","Textile")]
 
 wrapResult :: String -> String -> String
 wrapResult "1preview" s = "<div class=\"preview\">" ++ s ++ "</div>"

@@ -13,6 +13,7 @@ import           GHCJS.Types
 import           Reflex
 import           Reflex.Dom
 import           Reflex.Host.Class
+import           Safe                   (tailSafe)
 import           System.FilePath.Posix  (takeExtension)
 
 import           Widgets.Misc           (iconLinkClass)
@@ -26,7 +27,7 @@ import           Widgets.Misc           (iconLinkClass)
 JS(dropboxFile,"dropboxFile($1)", JSFun (JSString -> IO ()) -> IO ())
 
 
-locationDialog :: MonadWidget t m => m (El t, Event t (String, String))
+locationDialog :: MonadWidget t m => m (El t, (Event t String, Event t String))
 locationDialog =
   elAttr' "div" ("class" =: "ui small modal") $
   do divClass "header" (text "Open Location")
@@ -45,14 +46,19 @@ locationDialog =
           result <-
             getURL $
             tag (current (value urlBox)) openButton
-          return $
-            fmap (mapSnd (fromMaybe "")) .
-            ffilter (isJust . snd) $
-            result
+          let events =
+                ffilter (isJust . snd) $
+                result
+          return (fmap (fromMaybe "" .
+                        snd)
+                       events
+                 ,fmap fst events)
 
-getDropbox :: (MonadWidget t m) => m ((JSFun (JSString -> IO ()), Event t (String, String)))
+getDropbox :: (MonadWidget t m) => m (Event t String, Event t String)
 getDropbox =
-  do postGui <- askPostGui
+  do link <-
+       iconLinkClass "dropbox" "Dropbox" "item"
+     postGui <- askPostGui
      runWithActions <- askRunWithActions
      (eRecv,eRecvTriggerRef) <- newEventWithTriggerRef
      callback <-
@@ -72,11 +78,15 @@ getDropbox =
      result <-
        getURL $
        fmapMaybe id eRecv
-     return $
-       (callback
-       ,fmap (mapSnd (fromMaybe "")) .
-        ffilter (isJust . snd) $
-        result)
+     performEvent_ $
+       fmap (const . liftIO $ dropboxFile callback) link
+     let events =
+           ffilter (isJust . snd) $
+           result
+     return (fmap (fromMaybe "" .
+                   snd)
+                  events
+            ,fmap fst events)
 
 getURL :: (MonadWidget t m) => Event t String -> m (Event t (String, Maybe String))
 getURL url =
@@ -84,7 +94,7 @@ getURL url =
        performRequestAsync $
        fmap (\x -> XhrRequest "GET" x def) url
      let resp = fmap decodeXhrResponse r
-     ext <- holdDyn "md" $ fmap takeExtension url
+     ext <- holdDyn "md" $ fmap (tailSafe . takeExtension) url
      return $ attachDyn ext resp
   where decodeXhrResponse = processXhrResponse . fmap unpack . _xhrResponse_body
 

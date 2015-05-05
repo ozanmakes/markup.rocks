@@ -34,6 +34,7 @@ import           Reflex.Dom
 import           Reflex.Host.Class
 import           Safe                        (readMay)
 
+import           Formats
 import           Widgets.Misc                (icon)
 
 #ifdef __GHCJS__
@@ -44,6 +45,7 @@ import           Widgets.Misc                (icon)
 
 JS(makeCheckbox, "jQuery($1)['checkbox']()", HTMLElement -> IO ())
 JS(makeDropdown, "dropdownOnChange($1, $2)", HTMLElement -> JSFun (JSString -> IO ()) -> IO ())
+JS(dropdownSetValue,"jQuery($1)['dropdown']('set text', $2)", HTMLElement -> JSString -> IO ())
 
 data Setting t =
   Setting {_setting_value :: Dynamic t Bool}
@@ -51,6 +53,19 @@ data Setting t =
 data Selection t =
   Selection {_selection_value :: Dynamic t String
             ,_selection_setValue :: Event t String}
+
+data SelectionConfig t =
+  SelectionConfig {_selectionConfig_initialValue :: String
+                  ,_selectionConfig_label :: String
+                  ,_selectionConfig_options :: Dynamic t (Map String String)
+                  ,_selectionConfig_setValue :: Event t String}
+
+instance Reflex t => Default (SelectionConfig t) where
+  def =
+    SelectionConfig {_selectionConfig_initialValue = ""
+                    ,_selectionConfig_label = ""
+                    ,_selectionConfig_options = constDyn mempty
+                    ,_selectionConfig_setValue = never}
 
 setting :: MonadWidget t m => String -> m (Setting t)
 setting labelText =
@@ -78,11 +93,8 @@ setting labelText =
      return (Setting dValue)
 
 selection :: MonadWidget t m
-          => String
-          -> String
-          -> Dynamic t (Map String String)
-          -> m (Selection t)
-selection labelText k0 options =
+          => SelectionConfig t -> m (Selection t)
+selection (SelectionConfig k0 labelText options eSet) =
   do (eRaw,_) <-
        elAttr' "div" ("class" =: "ui dropdown compact search button") $
        do elClass "span" "text" (text labelText)
@@ -112,16 +124,26 @@ selection labelText k0 options =
                           [t :=>
                            Just val]) =<<
                  readRef eRecvTriggerRef)
-     liftIO $ makeDropdown (_el_element eRaw) onChangeFun
+     liftIO $
+       makeDropdown (_el_element eRaw)
+                    onChangeFun
      let readKey opts mk =
            fromMaybe k0 $
            do k <- mk
               guard $
                 Map.member k opts
               return k
+     performEvent_ $
+       fmap (liftIO .
+             dropdownSetValue (_el_element eRaw) .
+             toJSString .
+             flip (Map.findWithDefault "md") sourceFormats .
+             extToSource)
+            eSet
      dValue <-
        combineDyn readKey options =<<
-       holdDyn (Just k0) eRecv
+       holdDyn (Just k0)
+               (leftmost [fmap Just eSet,eRecv])
      return (Selection dValue never)
 
 setPref :: String -> String -> IO ()
