@@ -74,8 +74,10 @@ main =
      liftIO $
        enableMenu (_el_element menu)
      divClass "ui two column padded grid" $
-       do (readerD,t,exts) <-
-            divClass "left column" (editor locationContents)
+       do (dropzone,(readerD,t,exts)) <-
+            divClass "left column" $
+            elAttr' "div" ("class" =: "ui piled segment") $
+            (editor locationContents)
           divClass "right column" $
             divClass "ui piled segment" $
             do writerD <-
@@ -95,7 +97,8 @@ main =
                  forceLossy (updated parsed)
                let initial =
                      convertDoc "md" "1preview" githubMarkdownExtensions markdownExample
-               resultDyn <- holdDyn initial result
+               resultDyn <-
+                 holdDyn initial result
                elDynHtmlAttr' "div"
                               ("class" =: "output")
                               resultDyn
@@ -138,7 +141,6 @@ editor :: (MonadWidget t m)
        => Event t String
        -> m (Selection t,CodeMirror t,Dynamic t (Set Extension))
 editor eSet =
-  divClass "ui piled segment" $
   do d <-
        divClass "ui top left attached label" $
        selection "Markdown" "md" (constDyn sourceFormats)
