@@ -14,10 +14,14 @@
       cm.refresh();
     }, 0);
 
+    setTimeout(function () {
+      cm.refresh();
+    }, 1000);
+
     return cm;
   };
 
-  window.checkboxOnChange = function (el, cb) {
+  window.dropdownOnChange = function (el, cb) {
     $(el).dropdown({ onChange: cb });
   };
 
@@ -25,5 +29,9 @@
     $('.preview pre code').each(function (i, block) {
       window.hljs.highlightBlock(block);
     });
+  };
+
+  window.enableMenu = function (el) {
+    $(el).dropdown({on: 'hover', action: 'hide'});
   };
 })();

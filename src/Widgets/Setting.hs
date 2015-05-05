@@ -8,32 +8,33 @@ module Widgets.Setting where
 import           Control.Applicative
 import           Control.Monad
 import           Control.Monad.IO.Class
+import           Control.Monad.Ref
 import           Data.Default
-import           Data.Map                   (Map)
-import qualified Data.Map                   as Map
+import           Data.Dependent.Map          (DSum (..))
+import           Data.Map                    (Map)
+import qualified Data.Map                    as Map
 import           Data.Maybe
-import           Data.Monoid                ((<>))
+import           Data.Monoid                 ((<>))
 import           GHCJS.DOM
-import           GHCJS.DOM.DOMWindow        (domWindowGetLocalStorage)
+import           GHCJS.DOM.DOMWindow         (domWindowGetLocalStorage)
 import           GHCJS.DOM.Element
 import           GHCJS.DOM.HTMLElement
-import           GHCJS.DOM.HTMLElement      (htmlElementSetInnerText)
 import           GHCJS.DOM.HTMLInputElement
 import           GHCJS.DOM.HTMLLabelElement
-import GHCJS.DOM.HTMLSelectElement
-import           GHCJS.DOM.Node             (nodeAppendChild)
+import           GHCJS.DOM.HTMLSelectElement
+import           GHCJS.DOM.Node              (nodeAppendChild)
 import           GHCJS.DOM.Storage
-import           GHCJS.DOM.Types            (Element (..))
-import           Reflex
-import           Reflex.Dom
-import           Safe                       (readMay)
+import           GHCJS.DOM.Types             (Element (..))
 import           GHCJS.Foreign
 import           GHCJS.Types
-import           Data.Dependent.Map            (DSum (..))
-import           Control.Monad.Ref
+import           Reflex
 import           Reflex
 import           Reflex.Dom
+import           Reflex.Dom
 import           Reflex.Host.Class
+import           Safe                        (readMay)
+
+import           Widgets.Misc                (icon)
 
 #ifdef __GHCJS__
 #define JS(name, js, type) foreign import javascript unsafe js name :: type
@@ -42,7 +43,7 @@ import           Reflex.Host.Class
 #endif
 
 JS(makeCheckbox, "jQuery($1)['checkbox']()", HTMLElement -> IO ())
-JS(makeDropdown, "checkboxOnChange($1, $2)", HTMLElement -> JSFun (JSString -> IO ()) -> IO ())
+JS(makeDropdown, "dropdownOnChange($1, $2)", HTMLElement -> JSFun (JSString -> IO ()) -> IO ())
 
 data Setting t =
   Setting {_setting_value :: Dynamic t Bool}
@@ -84,8 +85,7 @@ selection labelText k0 options =
   do (eRaw,_) <-
        elAttr' "div" ("class" =: "ui dropdown compact search button") $
        do elClass "span" "text" (text labelText)
-          elClass "i" "dropdown icon" $
-            return ()
+          icon "dropdown"
           divClass "menu" $
             do optionsWithDefault <-
                  mapDyn (`Map.union` (k0 =: "")) options

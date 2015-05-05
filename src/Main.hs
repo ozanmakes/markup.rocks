@@ -18,9 +18,12 @@ import           Data.Either
 import           Data.List
 import           Data.Map                (Map)
 import qualified Data.Map                as Map
-import           Data.Monoid                ((<>))
+import           Data.Maybe              (fromMaybe)
+import           Data.Monoid             ((<>))
 import           Data.Set                (Set)
 import qualified Data.Set                as Set
+import           GHCJS.DOM.HTMLElement
+import           GHCJS.Foreign
 import           GHCJS.Types
 import           Reflex
 import           Reflex.Dom
@@ -30,6 +33,8 @@ import           Text.Pandoc
 import           Text.Pandoc.Error       (PandocError)
 
 import           Widgets.CodeMirror
+import           Widgets.Dialog.Location
+import           Widgets.Misc            (icon, iconLinkClass)
 import           Widgets.Setting
 
 data Component = Reader | Writer
@@ -41,16 +46,36 @@ data Component = Reader | Writer
 #endif
 
 JS(getTime,"(new Date())['getTime']()", IO Double)
+JS(enableMenu,"enableMenu($1)", HTMLElement -> IO ())
 JS(highlightCode,"highlightCode()", IO ())
+JS(showModal,"jQuery($1)['modal']('show')",HTMLElement -> IO ())
 
 main :: IO ()
 main =
   mainWidget $
-  do divClass "ui fixed inverted menu" $
-       divClass "header brand item" (text "markup.rocks")
+  do postGui <- askPostGui
+     (locationModal,locationContents) <- locationDialog
+     (menu,_) <-
+       divClass "ui fixed inverted menu" $
+       do divClass "header brand item" (text "markup.rocks")
+          elAttr' "div" ("class" =: "ui dropdown item") $
+            do text "Open"
+               icon "dropdown"
+               divClass "menu" $
+                 do divClass "header" (text "Local")
+                    iconLinkClass "file text" "File" "item"
+                    divClass "header" (text "Remote")
+                    loc <-
+                      iconLinkClass "world" "Location" "item"
+                    performEvent_ $
+                      fmap (const . liftIO . void . forkIO $
+                            showModal (_el_element locationModal))
+                           loc
+     liftIO $
+       enableMenu (_el_element menu)
      divClass "ui two column padded grid" $
        do (readerD,t,exts) <-
-            divClass "left column" editor
+            divClass "left column" (editor locationContents)
           divClass "right column" $
             divClass "ui piled segment" $
             do writerD <-
@@ -58,7 +83,7 @@ main =
                  selection "Preview" "1preview" (constDyn resultFormats)
                divClass "ui top right attached label" $
                  divClass "ui icon simple left dropdown compact button" $
-                 do elClass "i" "settings icon" (return ())
+                 do icon "settings"
                     divClass "menu" $
                       divClass "header" (text "Result Settings")
                parsed <-
@@ -68,7 +93,9 @@ main =
                                      $(unqDyn [|value t|])|])
                result <-
                  forceLossy (updated parsed)
-               resultDyn <- holdDyn "" result
+               let initial =
+                     convertDoc "md" "1preview" githubMarkdownExtensions markdownExample
+               resultDyn <- holdDyn initial result
                elDynHtmlAttr' "div"
                               ("class" =: "output")
                               resultDyn
@@ -107,10 +134,10 @@ forceLossy e =
                   modifyMVar_ diffsMVar appendTime
              putMVar mvar threadId
 
-
 editor :: (MonadWidget t m)
-       => m (Selection t,CodeMirror t,Dynamic t (Set Extension))
-editor =
+       => Event t String
+       -> m (Selection t,CodeMirror t,Dynamic t (Set Extension))
+editor eSet =
   divClass "ui piled segment" $
   do d <-
        divClass "ui top left attached label" $
@@ -118,7 +145,7 @@ editor =
      (advancedEditor,exts) <-
        divClass "ui top right attached label" $
        divClass "ui icon simple left dropdown compact button" $
-       do elClass "i" "settings icon" (return ())
+       do icon "settings"
           divClass "menu" $
             do divClass "header" (text "Source Settings")
                advancedEditor <-
@@ -132,7 +159,8 @@ editor =
              ,_codeMirrorConfig_enableCodeMirror =
                 updated (_setting_value advancedEditor)
              ,_codeMirrorConfig_changeLang =
-                updated (_selection_value d)}
+                updated (_selection_value d)
+             ,_codeMirrorConfig_setValue = eSet}
      return (d,t,exts)
 
 extensions :: (MonadWidget t m)

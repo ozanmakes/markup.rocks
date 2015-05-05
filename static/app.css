@@ -58,8 +58,11 @@ textarea {
   line-height:1.4375;
   border: none;
   margin-left:-2px;
-  margin-top: 30px;
   background-color: transparent;
+}
+
+textarea.input, .output {
+  margin-top: 30px;
 }
 
 .ui.top.attached.label {
@@ -75,6 +78,11 @@ code.hljs {
 code {
   font-size: 14px;
 }
+
+.ui.modal:not(.visible) {
+  display: none;
+}
+
 
 /*-------------------
         Grid
