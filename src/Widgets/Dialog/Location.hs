@@ -1,4 +1,5 @@
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE CPP         #-}
+{-# LANGUAGE RecursiveDo #-}
 
 module Widgets.Dialog.Location where
 
@@ -10,6 +11,7 @@ import           Data.Monoid            ((<>))
 import           Data.Text              (unpack)
 import           GHCJS.Foreign
 import           GHCJS.Types
+import           Network.URI            (isAbsoluteURI)
 import           Reflex
 import           Reflex.Dom
 import           Reflex.Host.Class
@@ -25,34 +27,30 @@ import           Widgets.Misc           (iconLinkClass)
 #endif
 
 JS(dropboxFile,"dropboxFile($1)", JSFun (JSString -> IO ()) -> IO ())
-
+JS(hideModal,"jQuery('.modal.active')['modal']('hide')",IO ())
 
 locationDialog :: MonadWidget t m => m (El t, (Event t String, Event t String))
 locationDialog =
   elAttr' "div" ("class" =: "ui small modal") $
   do divClass "header" (text "Open Location")
-     (form,urlBox) <-
-       elAttr' "form" ("class" =: "ui form") $
-       do divClass "field" $
-            do textInput def {_textInputConfig_inputType = "url"
-                             ,_textInputConfig_attributes =
-                                constDyn (("placeholder" =: "http://") <>
-                                          ("required" =: "required") <>
-                                          ("pattern" =: "https?://.+"))}
-     divClass "actions" $
-       do divClass "ui negative button" (text "No")
-          openButton <-
-            iconLinkClass "checkmark" "Open" "ui right labeled icon button"
-          result <-
-            getURL $
-            tag (current (value urlBox)) openButton
-          let events =
-                ffilter (isJust . snd) $
-                result
-          return (fmap (fromMaybe "" .
-                        snd)
-                       events
-                 ,fmap fst events)
+     rec (form,urlBox) <-
+           elAttr' "div" ("class" =: "ui form") $
+           do divClass "field" $
+                do textInput $
+                     TextInputConfig "url" "" (fmap (const "") result) (constDyn ("placeholder" =: "http://"))
+         (events, result) <- divClass "actions" $
+          do divClass "ui negative button" (text "No")
+             openButton <-
+               iconLinkClass "checkmark" "Open" "ui right labeled icon button"
+             result <-
+               getURL $
+               ffilter isAbsoluteURI $
+               tag (current (value urlBox)) $
+               leftmost [openButton,textInputGetEnter urlBox]
+             performEvent_ $ fmap (const . liftIO $ hideModal) result
+
+             return (ffilter (isJust . snd) $ result, result)
+     return (fmap (fromMaybe "" . snd) events, fmap fst events)
 
 getDropbox :: (MonadWidget t m) => m (Event t String, Event t String)
 getDropbox =
