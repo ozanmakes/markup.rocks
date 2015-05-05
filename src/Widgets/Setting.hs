@@ -7,7 +7,7 @@ module Widgets.Setting where
 
 import           Control.Applicative
 import           Control.Monad
-import           Control.Monad.IO.Class
+import           Control.Monad.IO.Class      (liftIO)
 import           Control.Monad.Ref
 import           Data.Default
 import           Data.Dependent.Map          (DSum (..))
@@ -49,7 +49,8 @@ data Setting t =
   Setting {_setting_value :: Dynamic t Bool}
 
 data Selection t =
-  Selection {_selection_value :: Dynamic t String}
+  Selection {_selection_value :: Dynamic t String
+            ,_selection_setValue :: Event t String}
 
 setting :: MonadWidget t m => String -> m (Setting t)
 setting labelText =
@@ -121,7 +122,7 @@ selection labelText k0 options =
      dValue <-
        combineDyn readKey options =<<
        holdDyn (Just k0) eRecv
-     return (Selection dValue)
+     return (Selection dValue never)
 
 setPref :: String -> String -> IO ()
 setPref key val =

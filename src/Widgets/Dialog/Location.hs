@@ -1,13 +1,32 @@
+{-# LANGUAGE CPP #-}
+
 module Widgets.Dialog.Location where
 
-import           Data.Monoid  ((<>))
-import           Data.Text    (unpack)
+import           Control.Monad.IO.Class (liftIO)
+import           Control.Monad.Ref
+import           Data.Dependent.Map     (DSum (..))
+import           Data.Maybe             (fromMaybe, isJust)
+import           Data.Monoid            ((<>))
+import           Data.Text              (unpack)
+import           GHCJS.Foreign
+import           GHCJS.Types
 import           Reflex
 import           Reflex.Dom
+import           Reflex.Host.Class
+import           System.FilePath.Posix  (takeExtension)
 
-import           Widgets.Misc (iconLinkClass)
+import           Widgets.Misc           (iconLinkClass)
 
-locationDialog :: MonadWidget t m => m (El t, Event t String)
+#ifdef __GHCJS__
+#define JS(name, js, type) foreign import javascript unsafe js name :: type
+#else
+#define JS(name, js, type) name :: type ; name = undefined
+#endif
+
+JS(dropboxFile,"dropboxFile($1)", JSFun (JSString -> IO ()) -> IO ())
+
+
+locationDialog :: MonadWidget t m => m (El t, Event t (String, String))
 locationDialog =
   elAttr' "div" ("class" =: "ui small modal") $
   do divClass "header" (text "Open Location")
@@ -27,15 +46,46 @@ locationDialog =
             getURL $
             tag (current (value urlBox)) openButton
           return $
-            fmapMaybe id result
+            fmap (mapSnd (fromMaybe "")) .
+            ffilter (isJust . snd) $
+            result
 
-getURL :: (MonadWidget t m) => Event t String -> m (Event t (Maybe String))
+getDropbox :: (MonadWidget t m) => m ((JSFun (JSString -> IO ()), Event t (String, String)))
+getDropbox =
+  do postGui <- askPostGui
+     runWithActions <- askRunWithActions
+     (eRecv,eRecvTriggerRef) <- newEventWithTriggerRef
+     callback <-
+       liftIO $
+       syncCallback1
+         AlwaysRetain
+         True
+         (\jsUrl ->
+            do let val = fromJSString jsUrl
+               maybe (return ())
+                     (\t ->
+                        postGui $
+                        runWithActions
+                          [t :=>
+                           Just val]) =<<
+                 readRef eRecvTriggerRef)
+     result <-
+       getURL $
+       fmapMaybe id eRecv
+     return $
+       (callback
+       ,fmap (mapSnd (fromMaybe "")) .
+        ffilter (isJust . snd) $
+        result)
+
+getURL :: (MonadWidget t m) => Event t String -> m (Event t (String, Maybe String))
 getURL url =
   do r <-
        performRequestAsync $
        fmap (\x -> XhrRequest "GET" x def) url
-     return $
-       fmap decodeXhrResponse r
+     let resp = fmap decodeXhrResponse r
+     ext <- holdDyn "md" $ fmap takeExtension url
+     return $ attachDyn ext resp
   where decodeXhrResponse = processXhrResponse . fmap unpack . _xhrResponse_body
 
 
@@ -44,3 +94,6 @@ processXhrResponse (Just "") = Nothing
 processXhrResponse (Just ('C':'a':'n':'n':'o':'t':' ':'G':'E':'T':_)) = Nothing
 processXhrResponse (Just r) = Just r
 processXhrResponse Nothing = Nothing
+
+mapSnd :: (a -> b) -> (c,a) -> (c,b)
+mapSnd f (x,y) = (x,f y)

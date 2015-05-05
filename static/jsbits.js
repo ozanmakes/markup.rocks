@@ -34,4 +34,27 @@
   window.enableMenu = function (el) {
     $(el).dropdown({on: 'hover', action: 'hide'});
   };
+
+  window.dropboxFile =  function (cb) {
+    Dropbox.choose({
+      success: function (files) { cb(files[0].link); },
+      linkType: "direct",
+      multiselect: false,
+      extensions: [
+        ".dbk",
+        ".html",
+        ".markdown",
+        ".md",
+        ".mw",
+        ".opml",
+        ".org",
+        ".rst",
+        ".t2t",
+        ".tex",
+        ".textile",
+        ".twiki",
+        ".xml"
+      ]
+    });
+  };
 })();

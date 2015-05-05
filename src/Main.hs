@@ -55,7 +55,7 @@ main =
   mainWidget $
   do postGui <- askPostGui
      (locationModal,locationContents) <- locationDialog
-     (menu,_) <-
+     (menu,dropboxContents) <-
        divClass "ui fixed inverted menu" $
        do divClass "header brand item" (text "markup.rocks")
           elAttr' "div" ("class" =: "ui dropdown item") $
@@ -71,13 +71,23 @@ main =
                       fmap (const . liftIO . void . forkIO $
                             showModal (_el_element locationModal))
                            loc
+                    (dropboxCb,dropboxContents) <- getDropbox
+                    dropboxLink <-
+                      iconLinkClass "dropbox" "Dropbox" "item"
+                    performEvent_ $
+                      fmap (const . liftIO $ dropboxFile dropboxCb) dropboxLink
+                    return dropboxContents
      liftIO $
        enableMenu (_el_element menu)
      divClass "ui two column padded grid" $
        do (dropzone,(readerD,t,exts)) <-
             divClass "left column" $
-            elAttr' "div" ("class" =: "ui piled segment") $
-            (editor locationContents)
+
+                        elAttr' "div" ("class" =: "ui piled segment") $
+            editor $
+            leftmost $
+            fmap (fmap snd)
+                 [locationContents,dropboxContents]
           divClass "right column" $
             divClass "ui piled segment" $
             do writerD <-
