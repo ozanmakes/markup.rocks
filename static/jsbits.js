@@ -35,7 +35,7 @@
     $(el).dropdown({on: 'hover', action: 'hide'});
   };
 
-  window.dropboxFile =  function (cb) {
+  window.dropboxOpen =  function (cb) {
     Dropbox.choose({
       success: function (files) { cb(files[0].link); },
       linkType: "direct",
@@ -53,8 +53,15 @@
         ".tex",
         ".textile",
         ".twiki",
+        ".txt",
         ".xml"
       ]
     });
+  };
+
+  window.dropboxSave = function (filename, str) {
+    var b64 = window.btoa(unescape(encodeURIComponent(str)));
+    var dataUri = "data:text/plain;charset=UTF-8;base64," + b64;
+    Dropbox.save(dataUri, filename);
   };
 })();

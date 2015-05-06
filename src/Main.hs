@@ -4,6 +4,7 @@
 {-# LANGUAGE GADTs                    #-}
 {-# LANGUAGE JavaScriptFFI            #-}
 {-# LANGUAGE TemplateHaskell          #-}
+{-# LANGUAGE RecursiveDo              #-}
 
 module Main where
 
@@ -32,6 +33,7 @@ import           Reflex.Dynamic.TH
 import           Text.Pandoc
 
 import           Formats
+import           LocalStorage            (getPref)
 import           Widgets.CodeMirror
 import           Widgets.Dialog.Location
 import           Widgets.Misc            (icon, iconLinkClass)
@@ -54,62 +56,82 @@ main :: IO ()
 main =
   mainWidget $
   do postGui <- askPostGui
-     (locationModal,(locationContents,locationExt)) <- locationDialog
-     (menu,(dropboxContents,dropboxExt)) <-
-       divClass "ui fixed inverted menu" $
-       do divClass "header brand item" (text "markup.rocks")
-          elAttr' "div" ("class" =: "ui dropdown item") $
-            do text "Open"
-               icon "dropdown"
-               divClass "menu" $
-                 do divClass "header" (text "Local")
-                    iconLinkClass "file text" "File" "item"
-                    divClass "header" (text "Remote")
-                    loc <-
-                      iconLinkClass "world" "Location" "item"
-                    performEvent_ $
-                      fmap (const . liftIO . void . forkIO $
-                            showModal (_el_element locationModal))
-                           loc
-                    getDropbox
-     liftIO $
-       enableMenu (_el_element menu)
-     divClass "ui two column padded grid" $
-       do (dropzone,(readerD,t,exts)) <-
-            divClass "left column" $
-            elAttr' "div" ("class" =: "ui piled segment") $
-            editor (leftmost [locationContents,dropboxContents])
-                   (leftmost [locationExt,dropboxExt])
-          divClass "right column" $
-            divClass "ui piled segment" $
-            do writerD <-
-                 divClass "ui top left attached label" $
-                 selection def {_selectionConfig_label = "Preview"
-                               ,_selectionConfig_initialValue = "1preview"
-                               ,_selectionConfig_options = constDyn resultFormats}
-               divClass "ui top right attached label" $
-                 divClass "ui icon simple left dropdown compact button" $
-                 do icon "settings"
-                    divClass "menu" $
-                      divClass "header" (text "Result Settings")
-               parsed <-
-                 $(qDyn [|convertDoc $(unqDyn [|_selection_value readerD|])
-                                     $(unqDyn [|_selection_value writerD|])
-                                     $(unqDyn [|exts|])
-                                     $(unqDyn [|value t|])|])
-               result <-
-                 forceLossy (updated parsed)
-               let initial =
-                     convertDoc "md" "1preview" githubMarkdownExtensions markdownExample
-               resultDyn <-
-                 holdDyn initial result
-               elDynHtmlAttr' "div"
-                              ("class" =: "output")
-                              resultDyn
-               performEvent_ $
-                 fmap (const . liftIO . void . forkIO $ highlightCode) result
-               return ()
-
+     (locationModal,(locationContents,locationFileName)) <- locationDialog
+     rec ((openMenu,saveMenu),(dropboxContents,dropboxFileName)) <-
+           divClass "ui fixed inverted menu" $
+           do divClass "header brand item" (text "markup.rocks")
+              (openMenu,dbox) <-
+                elAttr' "div" ("class" =: "ui dropdown item") $
+                do text "Open"
+                   icon "dropdown"
+                   divClass "menu" $
+                     do divClass "header" (text "Remote")
+                        loc <-
+                          iconLinkClass "world" "Location" "item"
+                        performEvent_ $
+                          fmap (const . liftIO . void . forkIO $
+                                showModal (_el_element locationModal))
+                               loc
+                        getDropbox
+              (saveMenu,_) <-
+                elAttr' "div" ("class" =: "ui dropdown item") $
+                do text "Save"
+                   icon "dropdown"
+                   divClass "menu" $
+                     do divClass "header" (text "Remote")
+                        saveToDropbox <-
+                          iconLinkClass "dropbox" "Dropbox" "item"
+                        content <- holdDyn ("md",markdownExample) output
+                        performEvent_ $
+                          fmap (\(ext,v) ->
+                                  liftIO . void . forkIO $
+                                  do filename <- getPref "Last File" ("untitled." ++ ext)
+                                     print filename
+                                     dropboxSave (toJSString filename)
+                                                 (toJSString v))
+                               (tagDyn content saveToDropbox)
+              return ((openMenu,saveMenu),dbox)
+         liftIO $
+           do enableMenu (_el_element openMenu)
+              enableMenu (_el_element saveMenu)
+         output <-
+           divClass "ui two column padded grid" $
+           do (dropzone,(readerD,t,exts)) <-
+                divClass "left column" $
+                elAttr' "div" ("class" =: "ui piled segment") $
+                editor (leftmost [locationContents,dropboxContents])
+                       (leftmost [locationFileName,dropboxFileName])
+              divClass "right column" $
+                divClass "ui piled segment" $
+                do writerD <-
+                     divClass "ui top left attached label" $
+                     selection def {_selectionConfig_label = "Preview"
+                                   ,_selectionConfig_initialValue = "1preview"
+                                   ,_selectionConfig_options = constDyn resultFormats}
+                   divClass "ui top right attached label" $
+                     divClass "ui icon simple left dropdown compact button" $
+                     do icon "settings"
+                        divClass "menu" $
+                          divClass "header" (text "Result Settings")
+                   parsed <-
+                     $(qDyn [|convertDoc $(unqDyn [|_selection_value readerD|])
+                                         $(unqDyn [|_selection_value writerD|])
+                                         $(unqDyn [|exts|])
+                                         $(unqDyn [|value t|])|])
+                   result <-
+                     forceLossy (updated parsed)
+                   let initial =
+                         convertDoc "md" "1preview" githubMarkdownExtensions markdownExample
+                   resultDyn <-
+                     holdDyn initial result
+                   elDynHtmlAttr' "div"
+                                  ("class" =: "output")
+                                  resultDyn
+                   performEvent_ $
+                     fmap (const . liftIO . void . forkIO $ highlightCode) result
+                   return $
+                     attachDyn (_selection_value writerD) result
+     return ()
 forceLossy :: (MonadWidget t m,NFData a)
            => Event t a -> m (Event t a)
 forceLossy e =

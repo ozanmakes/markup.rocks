@@ -16,8 +16,9 @@ import           Reflex
 import           Reflex.Dom
 import           Reflex.Host.Class
 import           Safe                   (tailSafe)
-import           System.FilePath.Posix  (takeExtension)
+import           System.FilePath.Posix  (takeExtension, takeFileName)
 
+import           LocalStorage           (setPref)
 import           Widgets.Misc           (iconLinkClass)
 
 #ifdef __GHCJS__
@@ -26,7 +27,8 @@ import           Widgets.Misc           (iconLinkClass)
 #define JS(name, js, type) name :: type ; name = undefined
 #endif
 
-JS(dropboxFile,"dropboxFile($1)", JSFun (JSString -> IO ()) -> IO ())
+JS(dropboxOpen,"dropboxOpen($1)", JSFun (JSString -> IO ()) -> IO ())
+JS(dropboxSave,"dropboxSave($1, $2)", JSString -> JSString -> IO ())
 JS(hideModal,"jQuery('.modal.active')['modal']('hide')",IO ())
 
 locationDialog :: MonadWidget t m => m (El t, (Event t String, Event t String))
@@ -77,7 +79,7 @@ getDropbox =
        getURL $
        fmapMaybe id eRecv
      performEvent_ $
-       fmap (const . liftIO $ dropboxFile callback) link
+       fmap (const . liftIO $ dropboxOpen callback) link
      let events =
            ffilter (isJust . snd) $
            result
@@ -92,8 +94,17 @@ getURL url =
        performRequestAsync $
        fmap (\x -> XhrRequest "GET" x def) url
      let resp = fmap decodeXhrResponse r
-     ext <- holdDyn "md" $ fmap (tailSafe . takeExtension) url
-     return $ attachDyn ext resp
+     ext <-
+       holdDyn "md" $
+       fmap (tailSafe . takeExtension) url
+     performEvent_ $
+       fmap (liftIO .
+             setPref "Last File" .
+             show .
+             takeFileName)
+            url
+     return $
+       attachDyn ext resp
   where decodeXhrResponse = processXhrResponse . fmap unpack . _xhrResponse_body
 
 

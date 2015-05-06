@@ -16,14 +16,12 @@ import qualified Data.Map                    as Map
 import           Data.Maybe
 import           Data.Monoid                 ((<>))
 import           GHCJS.DOM
-import           GHCJS.DOM.DOMWindow         (domWindowGetLocalStorage)
 import           GHCJS.DOM.Element
 import           GHCJS.DOM.HTMLElement
 import           GHCJS.DOM.HTMLInputElement
 import           GHCJS.DOM.HTMLLabelElement
 import           GHCJS.DOM.HTMLSelectElement
 import           GHCJS.DOM.Node              (nodeAppendChild)
-import           GHCJS.DOM.Storage
 import           GHCJS.DOM.Types             (Element (..))
 import           GHCJS.Foreign
 import           GHCJS.Types
@@ -32,9 +30,9 @@ import           Reflex
 import           Reflex.Dom
 import           Reflex.Dom
 import           Reflex.Host.Class
-import           Safe                        (readMay)
 
 import           Formats
+import           LocalStorage
 import           Widgets.Misc                (icon)
 
 #ifdef __GHCJS__
@@ -145,22 +143,3 @@ selection (SelectionConfig k0 labelText options eSet) =
        holdDyn (Just k0)
                (leftmost [fmap Just eSet,eRecv])
      return (Selection dValue never)
-
-setPref :: String -> String -> IO ()
-setPref key val =
-  do mbWindow <- currentWindow
-     case mbWindow of
-       Nothing -> return ()
-       Just win ->
-         do Just storage <- domWindowGetLocalStorage win
-            storageSetItem storage key val
-
-getPref :: Read a => String -> a -> IO a
-getPref key def =
-  do mbWindow <- currentWindow
-     case mbWindow of
-       Nothing -> return def
-       Just win ->
-         do Just storage <- domWindowGetLocalStorage win
-            fromMaybe def . readMay <$>
-              storageGetItem storage key
