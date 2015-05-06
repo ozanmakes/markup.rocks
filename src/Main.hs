@@ -229,10 +229,7 @@ stringToExtensions :: Component
                    -> [(String,Set Extension -> Set Extension)]
 stringToExtensions Reader "md" =
   [("Hard Line Breaks",Set.insert Ext_hard_line_breaks)
-  ,("GitHub Flavored",Set.union githubMarkdownExtensions)
-  ,("MultiMarkdown"
-   ,Set.delete Ext_raw_tex .
-    Set.union multimarkdownExtensions)]
+  ,("GitHub Flavored",Set.union githubMarkdownExtensions)]
 stringToExtensions _ _ = []
 
 wrapResult :: String -> String -> String
