@@ -36,6 +36,7 @@ import           Formats
 import           LocalStorage            (getPref)
 import           Widgets.CodeMirror
 import           Widgets.Dialog.Location
+import           Widgets.Dialog.OpenFile
 import           Widgets.Misc            (icon, iconLinkClass)
 import           Widgets.Setting
 
@@ -56,8 +57,9 @@ main :: IO ()
 main =
   mainWidget $
   do postGui <- askPostGui
-     (locationModal,(locationContents,locationFileName)) <- locationDialog
-     rec ((openMenu,saveMenu),(dropboxContents,dropboxFileName)) <-
+     (locationModal,(locationContents,locationExt)) <- locationDialog
+     (openFileModal,(fileContents, fileExt)) <- openFileDialog
+     rec ((openMenu,saveMenu),(dropboxContents,dropboxExt)) <-
            divClass "ui fixed inverted menu" $
            do divClass "header brand item" (text "markup.rocks")
               (openMenu,dbox) <-
@@ -65,7 +67,14 @@ main =
                 do text "Open"
                    icon "dropdown"
                    divClass "menu" $
-                     do divClass "header" (text "Remote")
+                     do divClass "header" (text "Local")
+                        file <-
+                          iconLinkClass "file text" "File" "item"
+                        performEvent_ $
+                          fmap (const . liftIO . void . forkIO $
+                                showModal (_el_element openFileModal))
+                               file
+                        divClass "header" (text "Remote")
                         loc <-
                           iconLinkClass "world" "Location" "item"
                         performEvent_ $
@@ -99,8 +108,8 @@ main =
            do (dropzone,(readerD,t,exts)) <-
                 divClass "left column" $
                 elAttr' "div" ("class" =: "ui piled segment") $
-                editor (leftmost [locationContents,dropboxContents])
-                       (leftmost [locationFileName,dropboxFileName])
+                editor (leftmost [locationContents,dropboxContents, fileContents])
+                       (leftmost [locationExt,dropboxExt, fileExt])
               divClass "right column" $
                 divClass "ui piled segment" $
                 do writerD <-

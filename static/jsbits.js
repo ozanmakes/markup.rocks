@@ -59,6 +59,15 @@
     });
   };
 
+  window.fileOpen = function (el, cb) {
+    el.addEventListener('change', function (ev) {
+      var reader = new FileReader();
+      var file = ev.target.files[0]
+      reader.onload = function () { cb(file.name, this.result); };
+      reader.readAsText(file);
+    }, false);
+  };
+
   window.dropboxSave = function (filename, str) {
     var b64 = window.btoa(unescape(encodeURIComponent(str)));
     var dataUri = "data:text/plain;charset=UTF-8;base64," + b64;

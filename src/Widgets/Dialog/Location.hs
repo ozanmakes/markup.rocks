@@ -35,11 +35,14 @@ locationDialog :: MonadWidget t m => m (El t, (Event t String, Event t String))
 locationDialog =
   elAttr' "div" ("class" =: "ui small modal") $
   do divClass "header" (text "Open Location")
-     rec (form,urlBox) <-
-           elAttr' "div" ("class" =: "ui form") $
+     rec urlBox <-
+           divClass "ui form" $
            do divClass "field" $
                 do textInput $
-                     TextInputConfig "url" "" (fmap (const "") result) (constDyn ("placeholder" =: "http://"))
+                     TextInputConfig "url"
+                                     ""
+                                     (fmap (const "") result)
+                                     (constDyn ("placeholder" =: "http://"))
          (events, result) <- divClass "actions" $
           do divClass "ui negative button" (text "No")
              openButton <-
