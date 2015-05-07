@@ -65,9 +65,9 @@ instance Reflex t => Default (SelectionConfig t) where
                     ,_selectionConfig_options = constDyn mempty
                     ,_selectionConfig_setValue = never}
 
-setting :: MonadWidget t m => String -> m (Setting t)
-setting labelText =
-  do val <- liftIO (getPref labelText False)
+setting :: MonadWidget t m => String -> Bool -> m (Setting t)
+setting labelText initial =
+  do val <- liftIO (getPref labelText initial)
      (parent,(input,_)) <-
        elAttr' "div" ("class" =: "ui toggle checkbox") $
        do el "label" (text labelText)

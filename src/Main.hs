@@ -128,11 +128,12 @@ main =
                      selection def {_selectionConfig_label = "Preview"
                                    ,_selectionConfig_initialValue = "1preview"
                                    ,_selectionConfig_options = constDyn resultFormats}
-                   divClass "ui top right attached label" $
+                   resCM <- divClass "ui top right attached label" $
                      divClass "ui icon simple left dropdown compact button" $
                      do icon "settings"
                         divClass "menu" $
-                          divClass "header" (text "Result Settings")
+                          do divClass "header" (text "Result Settings")
+                             divClass "item" (setting "CodeMirror Display" True)
                    parsed <-
                      $(qDyn [|convertDoc $(unqDyn [|_selection_value readerD|])
                                          $(unqDyn [|_selection_value writerD|])
@@ -144,9 +145,35 @@ main =
                          convertDoc "md" "1preview" githubMarkdownExtensions markdownExample
                    resultDyn <-
                      holdDyn initial result
-                   elDynHtmlAttr' "div"
-                                  ("class" =: "output")
-                                  resultDyn
+
+                   cmEnabled <- liftIO $ getPref "CodeMirror Display" True
+                   cmAttrs <-
+                     mapDyn (\w ->
+                               case w of
+                                 "1preview" ->
+                                   ("style" =: "display: none;" <> "class" =: "outputCM")
+                                 otherwise ->
+                                   ("class" =: "outputCM"))
+                            (_selection_value writerD)
+                   elDynAttr "div" cmAttrs $
+                     codeMirror
+                       def {_codeMirrorConfig_initialValue = initial
+                           ,_codeMirrorConfig_enabled = cmEnabled
+                           ,_codeMirrorConfig_enableCodeMirror =
+                              updated (_setting_value resCM)
+                           ,_codeMirrorConfig_changeLang =
+                              updated (_selection_value writerD)
+                           ,_codeMirrorConfig_setValue = result}
+                   htmlAttrs <-
+                     mapDyn (\w ->
+                               case w of
+                                 "1preview" ->
+                                   ("class" =: "output")
+                                 otherwise ->
+                                   ("style" =: "display: none;" <> "class" =: "output"))
+                            (_selection_value writerD)
+                   elDynAttr "div" htmlAttrs $
+                     elDynHtml' "div" resultDyn
                    performEvent_ $
                      fmap (const . liftIO . void . forkIO $ highlightCode) result
                    return $
@@ -203,12 +230,14 @@ editor eSet readerSet =
             do divClass "header" (text "Source Settings")
                advancedEditor <-
                  divClass "item" $
-                 setting "CodeMirror"
+                 setting "CodeMirror Editor" True
                exts <- extensions Reader "md"
                return (advancedEditor,exts)
+     cmEnabled <- liftIO $ getPref "CodeMirror Editor" True
      t <-
        codeMirror
          def {_codeMirrorConfig_initialValue = markdownExample
+             ,_codeMirrorConfig_enabled = cmEnabled
              ,_codeMirrorConfig_enableCodeMirror =
                 updated (_setting_value advancedEditor)
              ,_codeMirrorConfig_changeLang =
@@ -224,7 +253,7 @@ extensions component lang =
             mapM (\(label,modifier) ->
                     do s <-
                          divClass "item" $
-                         setting label
+                         setting label False
                        mapDyn (bool id modifier)
                               (_setting_value s))
                  (stringToExtensions component "md")
@@ -235,9 +264,7 @@ convertDoc :: String -> String -> Set Extension -> String -> String
 convertDoc readerStr writerStr extensions t =
   either (const "") writer parsed
   where parsed = reader t
-        writer =
-          wrapResult writerStr .
-          stringToWriter writerStr def
+        writer = stringToWriter writerStr def
         reader =
           stringToReader
             readerStr
@@ -251,10 +278,6 @@ stringToExtensions Reader "md" =
   [("Hard Line Breaks",Set.insert Ext_hard_line_breaks)
   ,("GitHub Flavored",Set.union githubMarkdownExtensions)]
 stringToExtensions _ _ = []
-
-wrapResult :: String -> String -> String
-wrapResult "1preview" s = "<div class=\"preview\">" ++ s ++ "</div>"
-wrapResult _ s = "<textarea>" ++ s ++ "</textarea>"
 
 stringToWriter :: String -> WriterOptions -> Pandoc -> String
 stringToWriter s =

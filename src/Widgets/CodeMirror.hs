@@ -21,8 +21,6 @@ import           Reflex
 import           Reflex.Dom
 import           Reflex.Host.Class
 
-import           LocalStorage                  (getPref)
-
 #ifdef __GHCJS__
 #define JS(name, js, type) foreign import javascript unsafe js name :: type
 #else
@@ -49,6 +47,7 @@ newCodeMirrorObj textarea onChange =
 
 data CodeMirrorConfig t =
   CodeMirrorConfig {_codeMirrorConfig_initialValue :: String
+                   ,_codeMirrorConfig_enabled :: Bool
                    ,_codeMirrorConfig_enableCodeMirror :: Event t Bool
                    ,_codeMirrorConfig_changeLang :: Event t String
                    ,_codeMirrorConfig_setValue :: Event t String
@@ -57,6 +56,7 @@ data CodeMirrorConfig t =
 instance Reflex t => Default (CodeMirrorConfig t) where
   def =
     CodeMirrorConfig {_codeMirrorConfig_initialValue = ""
+                     ,_codeMirrorConfig_enabled = True
                      ,_codeMirrorConfig_enableCodeMirror = never
                      ,_codeMirrorConfig_changeLang = never
                      ,_codeMirrorConfig_setValue = never
@@ -71,7 +71,7 @@ instance HasValue (CodeMirror t) where
 
 codeMirror :: MonadWidget t m
            => CodeMirrorConfig t -> m (CodeMirror t)
-codeMirror (CodeMirrorConfig initial eCM eLang eSet attrs) =
+codeMirror (CodeMirrorConfig initial enabled eCM eLang eSet attrs) =
   do e <-
        liftM castToHTMLTextAreaElement $
        buildEmptyElement "textarea" =<<
@@ -88,8 +88,7 @@ codeMirror (CodeMirrorConfig initial eCM eLang eSet attrs) =
      mvar <-
        liftIO $
        do htmlTextAreaElementSetValue e initial
-          cmEditor <- getPref "CodeMirror Editor" False
-          if cmEditor
+          if enabled
              then newCodeMirrorObj e onChange >>= newMVar
              else newEmptyMVar
      performEvent_ $
