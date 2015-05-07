@@ -64,13 +64,6 @@ main =
                  selection def {_selectionConfig_label = "Preview"
                                ,_selectionConfig_initialValue = "1preview"
                                ,_selectionConfig_options = constDyn resultFormats}
-               resCM <-
-                 divClass "ui top right attached label" $
-                 divClass "ui icon simple left dropdown compact circular button" $
-                 do icon "settings"
-                    divClass "menu" $
-                      do divClass "header" (text "Result Settings")
-                         divClass "item" (setting "CodeMirror Display" True)
                parsed <-
                  $(qDyn [|convertDoc $(unqDyn [|_selection_value readerD|])
                                      $(unqDyn [|_selection_value writerD|])
@@ -78,6 +71,15 @@ main =
                                      $(unqDyn [|value t|])|])
                result <-
                  forceLossy (updated parsed)
+               resCM <-
+                 divClass "ui top right attached label" $
+                 do let output = attachDyn (_selection_value writerD) result
+                    makeSaveMenu "Save" output ("md",markdownExample)
+                    divClass "ui icon dropdown compact button" $
+                      do icon "settings"
+                         divClass "menu" $
+                           do divClass "header" (text "Result Settings")
+                              divClass "item" (setting "CodeMirror Display" True)
                let initial =
                      convertDoc "md" "1preview" githubMarkdownExtensions markdownExample
                resultDyn <-
