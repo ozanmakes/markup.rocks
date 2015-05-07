@@ -21,6 +21,8 @@ import           Reflex
 import           Reflex.Dom
 import           Reflex.Host.Class
 
+import           LocalStorage                  (getPref)
+
 #ifdef __GHCJS__
 #define JS(name, js, type) foreign import javascript unsafe js name :: type
 #else
@@ -86,18 +88,21 @@ codeMirror (CodeMirrorConfig initial eCM eLang eSet attrs) =
      mvar <-
        liftIO $
        do htmlTextAreaElementSetValue e initial
-          newCodeMirrorObj e onChange >>=
-            newMVar
+          cmEditor <- getPref "CodeMirror Editor" False
+          if cmEditor
+             then newCodeMirrorObj e onChange >>= newMVar
+             else newEmptyMVar
      performEvent_ $
        fmap (\v ->
                liftIO $
                do maybeCodeMirror <- tryTakeMVar mvar
-                  case maybeCodeMirror of
-                    Just cm -> toTextArea cm
-                    Nothing ->
+                  case (v, maybeCodeMirror) of
+                    (False, Just cm) -> toTextArea cm
+                    (True, Nothing) ->
                       do cm <-
                            newCodeMirrorObj e onChange
-                         putMVar mvar cm)
+                         putMVar mvar cm
+                    otherwise -> return ())
             eCM
      performEvent_ $
        fmap (\v ->
