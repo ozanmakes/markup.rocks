@@ -33,12 +33,14 @@ import           Reflex.Dynamic.TH
 import           Text.Pandoc
 
 import           Formats
+import           Example
 import           LocalStorage            (getPref)
+import           Widgets.Menu
 import           Widgets.CodeMirror
-import           Widgets.Dialog.Location
-import           Widgets.Dialog.OpenFile
 import           Widgets.Misc            (icon, iconLinkClass)
 import           Widgets.Setting
+import           Widgets.Dialog.Location
+import           Widgets.Dialog.OpenFile
 
 data Component = Reader | Writer
 
@@ -49,72 +51,22 @@ data Component = Reader | Writer
 #endif
 
 JS(getTime,"(new Date())['getTime']()", IO Double)
-JS(enableMenu,"enableMenu($1)", HTMLElement -> IO ())
 JS(highlightCode,"highlightCode()", IO ())
-JS(showModal,"jQuery($1)['modal']('show')",HTMLElement -> IO ())
-JS(fileSave,"fileSave($1, $2)", JSString -> JSString -> IO ())
-JS(dropboxSave,"dropboxSave($1, $2)", JSString -> JSString -> IO ())
 
 main :: IO ()
 main =
   mainWidget $
   do postGui <- askPostGui
+     (openFileModal,(fileContents,fileExt)) <- openFileDialog
      (locationModal,(locationContents,locationExt)) <- locationDialog
-     (openFileModal,(fileContents, fileExt)) <- openFileDialog
-     rec ((openMenu,saveMenu),(dropboxContents,dropboxExt)) <-
+     rec (dropboxContents,dropboxExt) <-
            divClass "ui fixed inverted menu" $
            do divClass "header brand item" (text "markup.rocks")
-              (openMenu,dbox) <-
-                elAttr' "div" ("class" =: "ui dropdown item") $
-                do text "Open"
-                   icon "dropdown"
-                   divClass "menu" $
-                     do divClass "header" (text "Local")
-                        file <-
-                          iconLinkClass "file text" "File" "item"
-                        performEvent_ $
-                          fmap (const . liftIO . void . forkIO $
-                                showModal (_el_element openFileModal))
-                               file
-                        divClass "header" (text "Remote")
-                        loc <-
-                          iconLinkClass "world" "Location" "item"
-                        performEvent_ $
-                          fmap (const . liftIO . void . forkIO $
-                                showModal (_el_element locationModal))
-                               loc
-                        getDropbox
-              (saveMenu,_) <-
-                elAttr' "div" ("class" =: "ui dropdown item") $
-                do text "Save"
-                   icon "dropdown"
-                   divClass "menu" $
-                     do divClass "header" (text "Local")
-                        saveToFile <-
-                          iconLinkClass "download" "File" "item"
-                        divClass "header" (text "Remote")
-                        saveToDropbox <-
-                          iconLinkClass "dropbox" "Dropbox" "item"
-                        content <- holdDyn ("md",markdownExample) output
-                        performEvent_ $
-                          fmap (\(ext,v) ->
-                                  liftIO . void . forkIO $
-                                  do filename <- getPref "Last File" ("untitled." ++ ext)
-                                     dropboxSave (toJSString filename)
-                                                 (toJSString v))
-                               (tagDyn content saveToDropbox)
-                        performEvent_ $
-                          fmap (\(ext,v) ->
-                                  liftIO . void . forkIO $
-                                  do filename <- getPref "Last File" ("untitled." ++ ext)
-                                     fileSave (toJSString filename)
-                                              (toJSString v))
-                               (tagDyn content saveToFile)
-              return ((openMenu,saveMenu),dbox)
-         liftIO $
-           do enableMenu (_el_element openMenu)
-              enableMenu (_el_element saveMenu)
-         output <-
+              dbox <- openMenu openFileModal locationModal
+              makeSaveMenu "Save Source" input ("md",markdownExample)
+              makeSaveMenu "Save Result" output ("html",markdownExample)
+              return dbox
+         (input, output) <-
            divClass "ui two column padded grid" $
            do (dropzone,(readerD,t,exts)) <-
                 divClass "left column" $
@@ -173,11 +125,12 @@ main =
                                    ("style" =: "display: none;" <> "class" =: "output"))
                             (_selection_value writerD)
                    elDynAttr "div" htmlAttrs $
-                     elDynHtml' "div" resultDyn
+                     elDynHtmlAttr' "div" ("class" =: "preview") resultDyn
                    performEvent_ $
                      fmap (const . liftIO . void . forkIO $ highlightCode) result
                    return $
-                     attachDyn (_selection_value writerD) result
+                     (attachDyn (_selection_value readerD) (updated $ value t)
+                     ,attachDyn (_selection_value writerD) result)
      return ()
 forceLossy :: (MonadWidget t m,NFData a)
            => Event t a -> m (Event t a)
@@ -231,6 +184,7 @@ editor eSet readerSet =
                advancedEditor <-
                  divClass "item" $
                  setting "CodeMirror Editor" True
+               divClass "header" (text "Markdown")
                exts <- extensions Reader "md"
                return (advancedEditor,exts)
      cmEnabled <- liftIO $ getPref "CodeMirror Editor" True
@@ -244,6 +198,7 @@ editor eSet readerSet =
                 updated (_selection_value d)
              ,_codeMirrorConfig_setValue = eSet}
      return (d,t,exts)
+
 
 extensions :: (MonadWidget t m)
            => Component -> String -> m (Dynamic t (Set Extension))
@@ -293,41 +248,6 @@ stringToWriter s =
     "texinfo" -> writeTexinfo
     "textile" -> writeTextile
     otherwise -> writeMarkdown
-
-markdownExample =
-  unlines ["Heading"
-          ,"======="
-          ,""
-          ,"Sub-heading"
-          ,"-----------"
-          ,""
-          ,"### Another deeper heading"
-          ,""
-          ,"Paragraphs are separated"
-          ,"by a blank line."
-          ,""
-          ,"Leave 2 spaces at the end of a line to do a  "
-          ,"line break"
-          ,""
-          ,"Text attributes *italic*, **bold**,"
-          ,"`monospace`, ~~strikethrough~~ ."
-          ,""
-          ,"A [link](http://example.com)."
-          ,""
-          ,"Shopping list:"
-          ,""
-          ,"  * apples"
-          ,"  * oranges"
-          ,"  * pears"
-          ,""
-          ,"Numbered list:"
-          ,""
-          ,"  1. apples"
-          ,"  2. oranges"
-          ,"  3. pears"
-          ,""
-          ,"The rain---not the reign---in"
-          ,"Spain."]
 
 defaultExtensions :: Set Extension
 defaultExtensions =

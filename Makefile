@@ -34,7 +34,7 @@ compile:
 
 compress:
 	mkdir -p dist/$(FONTS)
-	closure-compiler --js static/app.js --js_output_file static/app.min.js
+	closure-compiler --js static/app.js --js_output_file static/app.min.js -W QUIET
 
 	$(GZIP) index.html > dist/index.html
 	$(GZIP) static/style.css > dist/static/style.css
