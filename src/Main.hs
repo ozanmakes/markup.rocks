@@ -73,13 +73,22 @@ main =
                  forceLossy (updated parsed)
                resCM <-
                  divClass "ui top right attached label" $
-                 do let output = attachDyn (_selection_value writerD) result
-                    makeSaveMenu "Save" output ("md",markdownExample)
-                    divClass "ui icon dropdown compact button" $
+                 do let output =
+                          attachDyn (_selection_value writerD) result
+                    makeSaveMenu "Save"
+                                 output
+                                 ("md",markdownExample)
+                    (menu,resCM) <-
+                      elAttr' "div"
+                              ("class" =: "ui left dropdown compact icon button") $
                       do icon "settings"
                          divClass "menu" $
                            do divClass "header" (text "Result Settings")
                               divClass "item" (setting "CodeMirror Display" True)
+                    liftIO $
+                      enableMenu (_el_element menu)
+                                 (toJSString "nothing")
+                    return resCM
                let initial =
                      convertDoc "md" "1preview" githubMarkdownExtensions markdownExample
                resultDyn <-

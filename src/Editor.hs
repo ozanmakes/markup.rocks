@@ -13,7 +13,7 @@ import           Text.Pandoc
 import           Reflex.Dynamic.TH
 import           Data.Bool               (bool)
 import qualified Data.Set                as Set
-
+import           GHCJS.Foreign
 
 import           LocalStorage            (getPref)
 import           Widgets.CodeMirror
@@ -44,7 +44,8 @@ editor =
            do dbox <- openMenu openFileModal locationModal
               let input = attachDyn (_selection_value d) (updated $ value t)
               makeSaveMenu "Save" input ("md",markdownExample)
-              divClass "ui icon dropdown compact button" $
+              (menu,children) <-
+                elAttr' "div" ("class" =: "ui left dropdown compact icon button")  $
                 do icon "settings"
                    divClass "menu" $
                      do divClass "header" (text "Source Settings")
@@ -55,6 +56,10 @@ editor =
                         exts <-
                           extensions Reader "md"
                         return (advancedEditor,exts,dbox)
+              liftIO $
+                enableMenu (_el_element menu)
+                           (toJSString "nothing")
+              return children
          cmEnabled <-
            liftIO $
            getPref "CodeMirror Editor" True

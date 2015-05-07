@@ -45,7 +45,6 @@ textarea.input, .CodeMirror.cm-s-neo, .output, .outputCM {
 
 .ui.left.dropdown > .menu {
   margin: 0px 1em 0px 0px;
-  top: 0px;
   left: auto;
   right: -51%;
 }
@@ -53,8 +52,8 @@ textarea.input, .CodeMirror.cm-s-neo, .output, .outputCM {
 .ui.right.attached.label > .ui.compact.button {
   top: -5px;
 }
-.ui.simple.dropdown.compact.button {
-  margin: 0px;
+.ui.icon.dropdown.compact.button {
+  margin-right: -5px;
 }
 
 .ui.dropdown.compact.button {
@@ -62,7 +61,8 @@ textarea.input, .CodeMirror.cm-s-neo, .output, .outputCM {
 }
 
 .ui.dropdown.compact.search.button {
-  margin-left: -8px;
+  margin-left: -14px;
+  margin-top: -7px;
 }
 
 code, .CodeMirror, textarea {
@@ -99,10 +99,7 @@ code {
 }
 
 .ui.grid > .column:not(.row), .ui.grid > .row > .column {
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  padding-top: 0.8rem;
-  padding-bottom: 0.6rem;
+  padding: 0.5rem;
 }
 
 /*-------------------

@@ -27,7 +27,7 @@ import           Widgets.Misc            (icon, iconLinkClass)
 
 JS(fileSave,"fileSave($1, $2)", JSString -> JSString -> IO ())
 JS(dropboxSave,"dropboxSave($1, $2)", JSString -> JSString -> IO ())
-JS(enableMenu,"enableMenu($1)", HTMLElement -> IO ())
+JS(enableMenu,"enableMenu($1, $2)", HTMLElement -> JSString -> IO ())
 JS(showModal,"jQuery($1)['modal']('show')",HTMLElement -> IO ())
 
 openMenu :: (MonadWidget t m)
@@ -54,7 +54,7 @@ openMenu openFileModal locationModal =
                       loc
                getDropbox
      liftIO $
-       enableMenu (_el_element menu)
+       enableMenu (_el_element menu) (toJSString "hide")
      return dbox
 
 makeSaveMenu label source def =
@@ -75,7 +75,7 @@ makeSaveMenu label source def =
                performEvent_ $
                  save dropboxSave (tagDyn content saveToDropbox)
      liftIO $
-       enableMenu (_el_element menu)
+       enableMenu (_el_element menu) (toJSString "hide")
 
 save target =
   fmap (\(format,v) ->

@@ -31,8 +31,8 @@
     });
   };
 
-  window.enableMenu = function (el) {
-    $(el).dropdown({on: 'hover', action: 'hide'});
+  window.enableMenu = function (el, action) {
+    $(el).dropdown({on: 'hover', action: action});
   };
 
   window.dropboxOpen =  function (el, cb) {
