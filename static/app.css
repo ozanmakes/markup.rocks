@@ -50,8 +50,19 @@ textarea.input, .CodeMirror.cm-s-neo, .output, .outputCM {
   right: -51%;
 }
 
+.ui.right.attached.label > .ui.compact.button {
+  top: -5px;
+}
 .ui.simple.dropdown.compact.button {
   margin: 0px;
+}
+
+.ui.dropdown.compact.button {
+  background-color: transparent;
+}
+
+.ui.dropdown.compact.search.button {
+  margin-left: -8px;
 }
 
 code, .CodeMirror, textarea {
@@ -87,6 +98,12 @@ code {
   display: none;
 }
 
+.ui.grid > .column:not(.row), .ui.grid > .row > .column {
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  padding-top: 0.8rem;
+  padding-bottom: 0.6rem;
+}
 
 /*-------------------
         Grid

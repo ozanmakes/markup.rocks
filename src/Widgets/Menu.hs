@@ -34,7 +34,7 @@ openMenu :: (MonadWidget t m)
          => El t -> El t -> m (Event t String,Event t String)
 openMenu openFileModal locationModal =
   do (menu,dbox) <-
-       elAttr' "div" ("class" =: "ui dropdown item") $
+       elAttr' "div" ("class" =: "ui dropdown compact button") $
        do text "Open"
           icon "dropdown"
           divClass "menu" $
@@ -59,7 +59,7 @@ openMenu openFileModal locationModal =
 
 makeSaveMenu label source def =
   do (menu,_) <-
-       elAttr' "div" ("class" =: "ui dropdown item") $
+       elAttr' "div" ("class" =: "ui dropdown compact button") $
        do text label
           icon "dropdown"
           divClass "menu" $

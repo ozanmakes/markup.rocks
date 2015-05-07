@@ -13,7 +13,6 @@ import           Control.Concurrent.MVar
 import           Control.DeepSeq
 import           Control.Monad
 import           Control.Monad.IO.Class
-import           Data.Bool               (bool)
 import           Data.Default
 import           Data.Either
 import           Data.List
@@ -32,6 +31,7 @@ import           Reflex.Dom.Class
 import           Reflex.Dynamic.TH
 import           Text.Pandoc
 
+import           Editor
 import           Formats
 import           Example
 import           LocalStorage            (getPref)
@@ -39,10 +39,6 @@ import           Widgets.Menu
 import           Widgets.CodeMirror
 import           Widgets.Misc            (icon, iconLinkClass)
 import           Widgets.Setting
-import           Widgets.Dialog.Location
-import           Widgets.Dialog.OpenFile
-
-data Component = Reader | Writer
 
 #ifdef __GHCJS__
 #define JS(name, js, type) foreign import javascript unsafe js name :: type
@@ -57,81 +53,72 @@ main :: IO ()
 main =
   mainWidget $
   do postGui <- askPostGui
-     (openFileModal,(fileContents,fileExt)) <- openFileDialog
-     (locationModal,(locationContents,locationExt)) <- locationDialog
-     rec (dropboxContents,dropboxExt) <-
-           divClass "ui fixed inverted menu" $
-           do divClass "header brand item" (text "markup.rocks")
-              dbox <- openMenu openFileModal locationModal
-              makeSaveMenu "Save Source" input ("md",markdownExample)
-              makeSaveMenu "Save Result" output ("html",markdownExample)
-              return dbox
-         (input, output) <-
-           divClass "ui two column padded grid" $
-           do (dropzone,(readerD,t,exts)) <-
-                divClass "left column" $
-                elAttr' "div" ("class" =: "ui piled segment") $
-                editor (leftmost [locationContents,dropboxContents, fileContents])
-                       (leftmost [locationExt,dropboxExt, fileExt])
-              divClass "right column" $
-                divClass "ui piled segment" $
-                do writerD <-
-                     divClass "ui top left attached label" $
-                     selection def {_selectionConfig_label = "Preview"
-                                   ,_selectionConfig_initialValue = "1preview"
-                                   ,_selectionConfig_options = constDyn resultFormats}
-                   resCM <- divClass "ui top right attached label" $
-                     divClass "ui icon simple left dropdown compact button" $
-                     do icon "settings"
-                        divClass "menu" $
-                          do divClass "header" (text "Result Settings")
-                             divClass "item" (setting "CodeMirror Display" True)
-                   parsed <-
-                     $(qDyn [|convertDoc $(unqDyn [|_selection_value readerD|])
-                                         $(unqDyn [|_selection_value writerD|])
-                                         $(unqDyn [|exts|])
-                                         $(unqDyn [|value t|])|])
-                   result <-
-                     forceLossy (updated parsed)
-                   let initial =
-                         convertDoc "md" "1preview" githubMarkdownExtensions markdownExample
-                   resultDyn <-
-                     holdDyn initial result
+     divClass "ui two column padded grid" $
+       do (readerD,t,exts) <-
+            divClass "left column" $
+            divClass "ui segment" editor
+          divClass "right column" $
+            divClass "ui segment" $
+            do writerD <-
+                 divClass "ui top left attached label" $
+                 selection def {_selectionConfig_label = "Preview"
+                               ,_selectionConfig_initialValue = "1preview"
+                               ,_selectionConfig_options = constDyn resultFormats}
+               resCM <-
+                 divClass "ui top right attached label" $
+                 divClass "ui icon simple left dropdown compact circular button" $
+                 do icon "settings"
+                    divClass "menu" $
+                      do divClass "header" (text "Result Settings")
+                         divClass "item" (setting "CodeMirror Display" True)
+               parsed <-
+                 $(qDyn [|convertDoc $(unqDyn [|_selection_value readerD|])
+                                     $(unqDyn [|_selection_value writerD|])
+                                     $(unqDyn [|exts|])
+                                     $(unqDyn [|value t|])|])
+               result <-
+                 forceLossy (updated parsed)
+               let initial =
+                     convertDoc "md" "1preview" githubMarkdownExtensions markdownExample
+               resultDyn <-
+                 holdDyn initial result
+               cmEnabled <-
+                 liftIO $
+                 getPref "CodeMirror Display" True
+               cmAttrs <-
+                 mapDyn (\w ->
+                           case w of
+                             "1preview" ->
+                               ("style" =: "display: none;" <> "class" =:
+                                "outputCM")
+                             otherwise ->
+                               ("class" =: "outputCM"))
+                        (_selection_value writerD)
+               elDynAttr "div" cmAttrs $
+                 codeMirror
+                   def {_codeMirrorConfig_initialValue = initial
+                       ,_codeMirrorConfig_enabled = cmEnabled
+                       ,_codeMirrorConfig_enableCodeMirror =
+                          updated (_setting_value resCM)
+                       ,_codeMirrorConfig_changeLang =
+                          updated (_selection_value writerD)
+                       ,_codeMirrorConfig_setValue = result}
+               htmlAttrs <-
+                 mapDyn (\w ->
+                           case w of
+                             "1preview" ->
+                               ("class" =: "output")
+                             otherwise ->
+                               ("style" =: "display: none;" <> "class" =:
+                                "output"))
+                        (_selection_value writerD)
+               elDynAttr "div" htmlAttrs $
+                 elDynHtmlAttr' "div"
+                                ("class" =: "preview")
+                                resultDyn
+               performEvent_ $
+                 fmap (const . liftIO . void . forkIO $ highlightCode) result
 
-                   cmEnabled <- liftIO $ getPref "CodeMirror Display" True
-                   cmAttrs <-
-                     mapDyn (\w ->
-                               case w of
-                                 "1preview" ->
-                                   ("style" =: "display: none;" <> "class" =: "outputCM")
-                                 otherwise ->
-                                   ("class" =: "outputCM"))
-                            (_selection_value writerD)
-                   elDynAttr "div" cmAttrs $
-                     codeMirror
-                       def {_codeMirrorConfig_initialValue = initial
-                           ,_codeMirrorConfig_enabled = cmEnabled
-                           ,_codeMirrorConfig_enableCodeMirror =
-                              updated (_setting_value resCM)
-                           ,_codeMirrorConfig_changeLang =
-                              updated (_selection_value writerD)
-                           ,_codeMirrorConfig_setValue = result}
-                   htmlAttrs <-
-                     mapDyn (\w ->
-                               case w of
-                                 "1preview" ->
-                                   ("class" =: "output")
-                                 otherwise ->
-                                   ("style" =: "display: none;" <> "class" =: "output"))
-                            (_selection_value writerD)
-                   elDynAttr "div" htmlAttrs $
-                     elDynHtmlAttr' "div" ("class" =: "preview") resultDyn
-                   performEvent_ $
-                     fmap (const . liftIO . void . forkIO $ highlightCode) result
-                   return $
-                     (attachDyn (_selection_value readerD) (updated $ value t)
-                     ,attachDyn (_selection_value writerD) result)
-     return ()
 forceLossy :: (MonadWidget t m,NFData a)
            => Event t a -> m (Event t a)
 forceLossy e =
@@ -163,57 +150,6 @@ forceLossy e =
                   modifyMVar_ diffsMVar appendTime
              putMVar mvar threadId
 
-editor :: (MonadWidget t m)
-       => Event t String
-       -> Event t String
-       -> m (Selection t,CodeMirror t,Dynamic t (Set Extension))
-editor eSet readerSet =
-  do d <-
-       divClass "ui top left attached label" $
-       selection $
-       SelectionConfig "md"
-                       "Markdown"
-                       (constDyn sourceFormats)
-                       readerSet
-     (advancedEditor,exts) <-
-       divClass "ui top right attached label" $
-       divClass "ui icon simple left dropdown compact button" $
-       do icon "settings"
-          divClass "menu" $
-            do divClass "header" (text "Source Settings")
-               advancedEditor <-
-                 divClass "item" $
-                 setting "CodeMirror Editor" True
-               divClass "header" (text "Markdown")
-               exts <- extensions Reader "md"
-               return (advancedEditor,exts)
-     cmEnabled <- liftIO $ getPref "CodeMirror Editor" True
-     t <-
-       codeMirror
-         def {_codeMirrorConfig_initialValue = markdownExample
-             ,_codeMirrorConfig_enabled = cmEnabled
-             ,_codeMirrorConfig_enableCodeMirror =
-                updated (_setting_value advancedEditor)
-             ,_codeMirrorConfig_changeLang =
-                updated (_selection_value d)
-             ,_codeMirrorConfig_setValue = eSet}
-     return (d,t,exts)
-
-
-extensions :: (MonadWidget t m)
-           => Component -> String -> m (Dynamic t (Set Extension))
-extensions component lang =
-  do exts <-
-       do exts <-
-            mapM (\(label,modifier) ->
-                    do s <-
-                         divClass "item" $
-                         setting label False
-                       mapDyn (bool id modifier)
-                              (_setting_value s))
-                 (stringToExtensions component "md")
-          mconcatDyn exts
-     $(qDyn [|$(unqDyn [|exts|]) defaultExtensions|])
 
 convertDoc :: String -> String -> Set Extension -> String -> String
 convertDoc readerStr writerStr extensions t =
@@ -226,13 +162,6 @@ convertDoc readerStr writerStr extensions t =
             def {readerApplyMacros = False
                 ,readerExtensions = extensions}
 
-stringToExtensions :: Component
-                   -> String
-                   -> [(String,Set Extension -> Set Extension)]
-stringToExtensions Reader "md" =
-  [("Hard Line Breaks",Set.insert Ext_hard_line_breaks)
-  ,("GitHub Flavored",Set.union githubMarkdownExtensions)]
-stringToExtensions _ _ = []
 
 stringToWriter :: String -> WriterOptions -> Pandoc -> String
 stringToWriter s =
@@ -248,8 +177,3 @@ stringToWriter s =
     "texinfo" -> writeTexinfo
     "textile" -> writeTextile
     otherwise -> writeMarkdown
-
-defaultExtensions :: Set Extension
-defaultExtensions =
-  Set.difference pandocExtensions
-                 (Set.fromList [Ext_raw_tex,Ext_latex_macros])
