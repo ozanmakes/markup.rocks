@@ -2,13 +2,13 @@ body {
   padding: 7px;
 }
 
-.CodeMirror.cm-s-neo {
-  margin-top: 28px;
+.CodeMirror.cm-s-neo, textarea.input, .output {
+  margin-top: 18px;
 }
 
 textarea.input, .CodeMirror.cm-s-neo, .output, .outputCM {
   width: 100%;
-  height: 97%;
+  height: 98%;
 }
 
 .outputCM > .CodeMirror.cm-s-neo, .outputCM > textarea {
@@ -74,10 +74,6 @@ textarea {
   border: none;
   margin-left:-2px;
   background-color: transparent;
-}
-
-textarea.input, .output {
-  margin-top: 30px;
 }
 
 .ui.top.attached.label {
