@@ -496,3 +496,27 @@ ol ol {
 ol ol li:before {
   margin-left: -2em;
 }
+
+::-webkit-scrollbar {
+  -webkit-appearance:none;
+  width:12px;
+  _background-color:#f0f0f0;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius:12px;
+  border:4px solid rgba(255,255,255,0);
+  background-clip:content-box;
+  _background-color:#bfbfbf;
+  background-color: #A0A0A0;
+}
+::-webkit-scrollbar-thumb:hover {
+  border-radius:12px;
+  border:4px solid rgba(255,255,255,0);
+  background-clip:content-box;
+  background-color:#A0A0A0;
+}
+
+::-webkit-scrollbar-corner {
+  background-color:#e6e6e6;
+}
