@@ -74,6 +74,7 @@ textarea {
   border: none;
   margin-left:-2px;
   background-color: transparent;
+  outline: none;
 }
 
 .ui.top.attached.label {
