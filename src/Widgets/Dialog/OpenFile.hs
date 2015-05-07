@@ -1,23 +1,25 @@
-{-# LANGUAGE CPP         #-}
+{-# LANGUAGE CPP #-}
 
 module Widgets.Dialog.OpenFile where
 
-import           Control.Monad.IO.Class (liftIO)
+import           Control.Monad.IO.Class     (liftIO)
 import           Control.Monad.Ref
-import           Data.Dependent.Map     (DSum (..))
-import           Data.Maybe             (fromMaybe, isJust)
-import           Data.Monoid            ((<>))
+import           Data.Dependent.Map         (DSum (..))
+import           Data.List                  (intercalate)
+import           Data.Maybe                 (fromMaybe, isJust)
+import           Data.Monoid                ((<>))
 import           GHCJS.DOM.HTMLInputElement
 import           GHCJS.Foreign
 import           GHCJS.Types
 import           Reflex
 import           Reflex.Dom
 import           Reflex.Host.Class
-import           Safe                   (tailSafe)
-import           System.FilePath.Posix  (takeExtension)
+import           Safe                       (tailSafe)
+import           System.FilePath.Posix      (takeExtension)
 
-import           LocalStorage           (setPref)
-import           Widgets.Misc           (iconLinkClass)
+import           Formats                    (supportedExtensions)
+import           LocalStorage               (setPref)
+import           Widgets.Misc               (iconLinkClass)
 
 #ifdef __GHCJS__
 #define JS(name, js, type) foreign import javascript unsafe js name :: type
@@ -41,7 +43,8 @@ openFileDialog =
                  textInput def {_textInputConfig_inputType = "file"
                                ,_textInputConfig_attributes =
                                   constDyn ("enctype" =: "multipart/form-data" <>
-                                            "style" =: "font-size: 34px;")}
+                                            "style" =: "font-size: 34px;" <>
+                                            "accept" =: intercalate "," supportedExtensions)}
                postGui <- askPostGui
                runWithActions <- askRunWithActions
                (eRecv,eRecvTriggerRef) <- newEventWithTriggerRef

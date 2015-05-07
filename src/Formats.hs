@@ -56,3 +56,20 @@ resultFormats =
     ,("rst","reStructuredText")
     ,("texinfo","Texinfo")
     ,("textile","Textile")]
+
+supportedExtensions :: [String]
+supportedExtensions =
+  [".dbk"
+  ,".html"
+  ,".markdown"
+  ,".md"
+  ,".mw"
+  ,".opml"
+  ,".org"
+  ,".rst"
+  ,".t2t"
+  ,".tex"
+  ,".textile"
+  ,".twiki"
+  ,".txt"
+  ,".xml"]
