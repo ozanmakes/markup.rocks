@@ -34,12 +34,11 @@ compile:
 
 compress:
 	mkdir -p dist/$(FONTS)
-	closure-compiler --js src/Main.jsexe/all.js --js_output_file static/all.min.js
-	cat $(JS) static/all.min.js > static/app.js
+	closure-compiler --js static/app.js --js_output_file static/app.min.js
 
 	$(GZIP) index.html > dist/index.html
 	$(GZIP) static/style.css > dist/static/style.css
-	$(GZIP) static/app.js > dist/static/app.js
+	$(GZIP) static/app.min.js > dist/static/app.js
 
 	$(GZIP) $(FONTS)/icons.otf > dist/$(FONTS)/icons.otf
 	$(GZIP) $(FONTS)/icons.svg > dist/$(FONTS)/icons.svg
