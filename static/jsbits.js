@@ -68,8 +68,13 @@
     }, false);
   };
 
-  window.dropboxSave = function (filename, str) {
-    var b64 = window.btoa(unescape(encodeURIComponent(str)));
+  window.fileSave = function (filename, contents) {
+    var blob = new Blob([contents], {type: "text/plain;charset=utf-8"});
+    saveAs(blob, filename);
+  };
+
+  window.dropboxSave = function (filename, contents) {
+    var b64 = window.btoa(unescape(encodeURIComponent(contents)));
     var dataUri = "data:text/plain;charset=UTF-8;base64," + b64;
     Dropbox.save(dataUri, filename);
   };

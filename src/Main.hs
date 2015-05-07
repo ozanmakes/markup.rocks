@@ -52,6 +52,8 @@ JS(getTime,"(new Date())['getTime']()", IO Double)
 JS(enableMenu,"enableMenu($1)", HTMLElement -> IO ())
 JS(highlightCode,"highlightCode()", IO ())
 JS(showModal,"jQuery($1)['modal']('show')",HTMLElement -> IO ())
+JS(fileSave,"fileSave($1, $2)", JSString -> JSString -> IO ())
+JS(dropboxSave,"dropboxSave($1, $2)", JSString -> JSString -> IO ())
 
 main :: IO ()
 main =
@@ -87,7 +89,10 @@ main =
                 do text "Save"
                    icon "dropdown"
                    divClass "menu" $
-                     do divClass "header" (text "Remote")
+                     do divClass "header" (text "Local")
+                        saveToFile <-
+                          iconLinkClass "download" "File" "item"
+                        divClass "header" (text "Remote")
                         saveToDropbox <-
                           iconLinkClass "dropbox" "Dropbox" "item"
                         content <- holdDyn ("md",markdownExample) output
@@ -95,10 +100,16 @@ main =
                           fmap (\(ext,v) ->
                                   liftIO . void . forkIO $
                                   do filename <- getPref "Last File" ("untitled." ++ ext)
-                                     print filename
                                      dropboxSave (toJSString filename)
                                                  (toJSString v))
                                (tagDyn content saveToDropbox)
+                        performEvent_ $
+                          fmap (\(ext,v) ->
+                                  liftIO . void . forkIO $
+                                  do filename <- getPref "Last File" ("untitled." ++ ext)
+                                     fileSave (toJSString filename)
+                                              (toJSString v))
+                               (tagDyn content saveToFile)
               return ((openMenu,saveMenu),dbox)
          liftIO $
            do enableMenu (_el_element openMenu)

@@ -19,6 +19,7 @@ JS=vendor/codemirror/lib/codemirror.js							\
 	 static/highlight.pack.js													\
 	 static/jquery.js																	\
 	 static/semantic.min.js														\
+	 vendor/FileSaver.min.js                          \
 	 static/jsbits.js
 
 CSS=vendor/codemirror/lib/codemirror.css	\

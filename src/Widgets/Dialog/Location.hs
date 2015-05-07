@@ -28,7 +28,6 @@ import           Widgets.Misc           (iconLinkClass)
 #endif
 
 JS(dropboxOpen,"dropboxOpen($1)", JSFun (JSString -> IO ()) -> IO ())
-JS(dropboxSave,"dropboxSave($1, $2)", JSString -> JSString -> IO ())
 JS(hideModal,"jQuery('.modal.active')['modal']('hide')",IO ())
 
 locationDialog :: MonadWidget t m => m (El t, (Event t String, Event t String))
