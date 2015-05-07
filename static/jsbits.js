@@ -35,27 +35,29 @@
     $(el).dropdown({on: 'hover', action: 'hide'});
   };
 
-  window.dropboxOpen =  function (cb) {
-    Dropbox.choose({
-      success: function (files) { cb(files[0].link); },
-      linkType: "direct",
-      multiselect: false,
-      extensions: [
-        ".dbk",
-        ".html",
-        ".markdown",
-        ".md",
-        ".mw",
-        ".opml",
-        ".org",
-        ".rst",
-        ".t2t",
-        ".tex",
-        ".textile",
-        ".twiki",
-        ".txt",
-        ".xml"
-      ]
+  window.dropboxOpen =  function (el, cb) {
+    $(el).click(function () {
+      Dropbox.choose({
+        success: function (files) { cb(files[0].link); },
+        linkType: "direct",
+        multiselect: false,
+        extensions: [
+          ".dbk",
+          ".html",
+          ".markdown",
+          ".md",
+          ".mw",
+          ".opml",
+          ".org",
+          ".rst",
+          ".t2t",
+          ".tex",
+          ".textile",
+          ".twiki",
+          ".txt",
+          ".xml"
+        ]
+      });
     });
   };
 

@@ -9,6 +9,7 @@ import           Data.Dependent.Map     (DSum (..))
 import           Data.Maybe             (fromMaybe, isJust)
 import           Data.Monoid            ((<>))
 import           Data.Text              (unpack)
+import           GHCJS.DOM.HTMLElement
 import           GHCJS.Foreign
 import           GHCJS.Types
 import           Network.URI            (isAbsoluteURI)
@@ -19,7 +20,7 @@ import           Safe                   (tailSafe)
 import           System.FilePath.Posix  (takeExtension, takeFileName)
 
 import           LocalStorage           (setPref)
-import           Widgets.Misc           (iconLinkClass)
+import           Widgets.Misc           (icon, iconLinkClass)
 
 #ifdef __GHCJS__
 #define JS(name, js, type) foreign import javascript unsafe js name :: type
@@ -27,7 +28,7 @@ import           Widgets.Misc           (iconLinkClass)
 #define JS(name, js, type) name :: type ; name = undefined
 #endif
 
-JS(dropboxOpen,"dropboxOpen($1)", JSFun (JSString -> IO ()) -> IO ())
+JS(dropboxOpen,"dropboxOpen($1, $2)", HTMLElement -> JSFun (JSString -> IO ()) -> IO ())
 JS(hideModal,"jQuery('.modal.active')['modal']('hide')",IO ())
 
 locationDialog :: MonadWidget t m => m (El t, (Event t String, Event t String))
@@ -58,8 +59,10 @@ locationDialog =
 
 getDropbox :: (MonadWidget t m) => m (Event t String, Event t String)
 getDropbox =
-  do link <-
-       iconLinkClass "dropbox" "Dropbox" "item"
+  do (linkEl, _) <-
+       buildElement "a" ("class" =: "item") $
+       do icon "dropbox"
+          text "Dropbox"
      postGui <- askPostGui
      runWithActions <- askRunWithActions
      (eRecv,eRecvTriggerRef) <- newEventWithTriggerRef
@@ -80,8 +83,7 @@ getDropbox =
      result <-
        getURL $
        fmapMaybe id eRecv
-     performEvent_ $
-       fmap (const . liftIO $ dropboxOpen callback) link
+     liftIO $ dropboxOpen linkEl callback
      let events =
            ffilter (isJust . snd) $
            result
