@@ -163,7 +163,7 @@ forceLossy e =
                   diffs <- readMVar diffsMVar
                   let avg =
                         round $ sum diffs / genericLength diffs :: Int
-                  when (avg > 500)
+                  when (avg > 300)
                        (threadDelay (min (avg * 1000) 1000000))
                   cb $!! e
                   end <- getTime
