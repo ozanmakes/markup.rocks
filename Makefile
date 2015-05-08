@@ -33,18 +33,15 @@ compile:
 	cat $(JS) src/Main.jsexe/all.js > static/app.js
 
 compress:
-	mkdir -p dist/$(FONTS)
+	mkdir -p dist/$(FONTS) dist/static/icon
+
 	closure-compiler --js static/app.js --js_output_file static/app.min.js -W QUIET
 
 	$(GZIP) index.html > dist/index.html
 	$(GZIP) static/style.css > dist/static/style.css
 	$(GZIP) static/app.min.js > dist/static/app.js
-
-	$(GZIP) $(FONTS)/icons.otf > dist/$(FONTS)/icons.otf
-	$(GZIP) $(FONTS)/icons.svg > dist/$(FONTS)/icons.svg
-	$(GZIP) $(FONTS)/icons.ttf > dist/$(FONTS)/icons.ttf
-	$(GZIP) $(FONTS)/icons.woff > dist/$(FONTS)/icons.woff
-	$(GZIP) $(FONTS)/icons.woff2 > dist/$(FONTS)/icons.woff2
+	for file in static/icon/*; do $(GZIP) "$$file" > "dist/$$file"; done
+	for file in $(FONTS)/*; do $(GZIP) "$$file" > "dist/$$file"; done
 
 
 clean:
