@@ -2,24 +2,37 @@ GZIP=zopfli -c -i1000
 # GZIP=gzip -c
 FONTS=static/themes/default/assets/fonts
 
-JS=vendor/codemirror/lib/codemirror.js							\
-	 vendor/codemirror/addon/mode/overlay.js					\
-	 vendor/codemirror/mode/meta.js										\
-	 vendor/codemirror/mode/xml/xml.js								\
-	 vendor/codemirror/mode/markdown/markdown.js			\
-	 vendor/codemirror/mode/gfm/gfm.js								\
-	 vendor/codemirror/mode/python/python.js					\
-	 vendor/codemirror/mode/stex/stex.js							\
-	 vendor/codemirror/mode/rst/rst.js								\
-	 vendor/codemirror/mode/javascript/javascript.js	\
-	 vendor/codemirror/mode/css/css.js								\
-	 vendor/codemirror/mode/textile/textile.js				\
-	 vendor/codemirror/mode/htmlmixed/htmlmixed.js		\
-	 vendor/codemirror/mode/troff/troff.js						\
-	 static/highlight.pack.js													\
-	 static/jquery.js																	\
-	 static/semantic.min.js														\
-	 vendor/FileSaver.min.js                          \
+JS=vendor/codemirror/lib/codemirror.js									\
+	 vendor/codemirror/addon/mode/overlay.js							\
+	 vendor/codemirror/mode/meta.js												\
+	 vendor/codemirror/mode/xml/xml.js										\
+	 vendor/codemirror/mode/markdown/markdown.js					\
+	 vendor/codemirror/mode/gfm/gfm.js										\
+	 vendor/codemirror/mode/python/python.js							\
+	 vendor/codemirror/mode/stex/stex.js									\
+	 vendor/codemirror/mode/rst/rst.js										\
+	 vendor/codemirror/mode/javascript/javascript.js			\
+	 vendor/codemirror/mode/css/css.js										\
+	 vendor/codemirror/mode/textile/textile.js						\
+	 vendor/codemirror/mode/htmlmixed/htmlmixed.js				\
+	 vendor/codemirror/mode/troff/troff.js								\
+	 vendor/codemirror/mode/coffeescript/coffeescript.js	\
+	 vendor/codemirror/mode/commonlisp/commonlisp.js			\
+	 vendor/codemirror/mode/erlang/erlang.js							\
+	 vendor/codemirror/mode/clojure/clojure.js						\
+	 vendor/codemirror/mode/go/go.js											\
+	 vendor/codemirror/mode/haskell/haskell.js						\
+	 vendor/codemirror/mode/lua/lua.js										\
+	 vendor/codemirror/mode/perl/perl.js									\
+	 vendor/codemirror/mode/r/r.js												\
+	 vendor/codemirror/mode/ruby/ruby.js									\
+	 vendor/codemirror/mode/shell/shell.js								\
+	 vendor/codemirror/mode/scheme/scheme.js							\
+	 vendor/codemirror/mode/sql/sql.js										\
+	 static/highlight.pack.js															\
+	 static/jquery.js																			\
+	 static/semantic.min.js																\
+	 vendor/FileSaver.min.js															\
 	 static/jsbits.js
 
 CSS=vendor/codemirror/lib/codemirror.css	\
