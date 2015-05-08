@@ -135,9 +135,13 @@ codeMirror (CodeMirrorConfig initial enabled eCM eLang eSet attrs) =
 langToMode :: String -> String
 langToMode lang =
   case lang of
-    "md" -> "gfm"
+    "dbk" -> "xml"
     "html" -> "htmlmixed"
-    "textile" -> "textile"
-    "rst" -> "rst"
+    "icml" -> "xml"
     "man" -> "troff"
+    "md" -> "gfm"
+    "odt" -> "xml"
+    "opml" -> "xml"
+    "rst" -> "rst"
+    "textile" -> "textile"
     _ -> "null"

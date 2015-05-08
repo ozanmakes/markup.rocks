@@ -187,6 +187,12 @@ stringToWriter s =
     "html" -> writeHtmlString
     "latex" -> writeLaTeX
     "man" -> writeMan
+    "mw" -> writeMediaWiki
+    "dw" -> writeDokuWiki
+    "dbk" -> writeDocbook
+    "odt" -> writeOpenDocument
+    "opml" -> writeOPML
+    "icml" -> writeICML
     "org" -> writeOrg
     "plain" -> writePlain
     "rst" -> writeRST
