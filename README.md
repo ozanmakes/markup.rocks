@@ -23,7 +23,7 @@ The easiest way to get a working GHCJS installation is to use the provided
 nix-based build environment.
 
 ```bash
-$ git clone https://github.com/osener/markup.rocks.env
+$ git clone --recursive https://github.com/osener/markup.rocks.env
 $ git clone https://github.com/osener/markup.rocks
 $ markup.rocks.env/activate  # this will take a while
 $ make -C markup.rocks
