@@ -1,5 +1,7 @@
-{-# LANGUAGE CPP         #-}
-{-# LANGUAGE RecursiveDo #-}
+{-# LANGUAGE CPP             #-}
+{-# LANGUAGE GADTs           #-}
+{-# LANGUAGE RecursiveDo     #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Widgets.Dialog.Location where
 
@@ -15,12 +17,14 @@ import           GHCJS.Types
 import           Network.URI            (isAbsoluteURI)
 import           Reflex
 import           Reflex.Dom
+import           Reflex.Dynamic.TH
 import           Reflex.Host.Class
 import           Safe                   (tailSafe)
 import           System.FilePath.Posix  (takeExtension, takeFileName)
 
 import           LocalStorage           (setPref)
 import           Widgets.Misc           (icon, iconLinkClass)
+import           Widgets.Setting
 
 #ifdef __GHCJS__
 #define JS(name, js, type) foreign import javascript unsafe js name :: type
@@ -37,24 +41,31 @@ locationDialog =
   do divClass "header" (text "Open Location")
      rec urlBox <-
            divClass "ui form" $
-           do divClass "field" $
-                do textInput $
-                     TextInputConfig "url"
-                                     ""
-                                     (fmap (const "") result)
-                                     (constDyn ("placeholder" =: "http://"))
+           divClass "field" $
+           textInput $
+             TextInputConfig "url"
+                             ""
+                             (fmap (const "") result)
+                             (constDyn ("placeholder" =: "http://"))
          (events, result) <- divClass "actions" $
-          do divClass "ui negative button" (text "No")
+          do cors <- setting "CORS Proxy" True
+             divClass "ui button" (text "Cancel")
              openButton <-
-               iconLinkClass "checkmark" "Open" "ui right labeled icon button"
+               iconLinkClass "checkmark" "Open" "ui positive right labeled icon button"
+             url <-
+               $(qDyn [|let url = $(unqDyn [|(_textInput_value urlBox)|]) in
+                          if $(unqDyn [|_setting_value cors|])
+                             then "http://cors.maxogden.com/" ++ url
+                             else url|])
+
              result <-
                getURL $
                ffilter isAbsoluteURI $
-               tag (current (value urlBox)) $
+               tag (current url) $
                leftmost [openButton,textInputGetEnter urlBox]
              performEvent_ $ fmap (const . liftIO $ hideModal) result
 
-             return (ffilter (isJust . snd) $ result, result)
+             return (ffilter (isJust . snd) result, result)
      return (fmap (fromMaybe "" . snd) events, fmap fst events)
 
 getDropbox :: (MonadWidget t m) => m (Event t String, Event t String)
@@ -84,9 +95,7 @@ getDropbox =
        getURL $
        fmapMaybe id eRecv
      liftIO $ dropboxOpen linkEl callback
-     let events =
-           ffilter (isJust . snd) $
-           result
+     let events = ffilter (isJust . snd) result
      return (fmap (fromMaybe "" .
                    snd)
                   events
