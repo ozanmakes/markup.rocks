@@ -80,6 +80,12 @@ main =
                     makeSaveMenu "Save"
                                  output
                                  (ext,doc)
+                    elAttr "div"
+                           ("class" =: "ui left dropdown compact icon button") $
+                      elAttr "a"
+                             ("target" =: "_blank" <> "href" =:
+                              "https://github.com/osener/markup.rocks")
+                             (icon "github")
                     (menu,resCM) <-
                       elAttr' "div"
                               ("class" =: "ui left dropdown compact icon button") $
@@ -132,7 +138,11 @@ main =
                performEvent_ $
                  fmap (const . liftIO . void . forkIO $ highlightCode) result
                performEvent_ $
-                 fmap (liftIO . void . forkIO . setPref "Last Document" . show)
+                 fmap (liftIO .
+                       void .
+                       forkIO .
+                       setPref "Last Document" .
+                       show)
                       (updated $ value t)
 
 forceLossy :: (MonadWidget t m,NFData a)
