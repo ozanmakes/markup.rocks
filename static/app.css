@@ -15,14 +15,8 @@ textarea.input, .CodeMirror.cm-s-neo, .output, .outputCM {
   height: 100%;
 }
 
-.ui.inverted.menu {
-  background-color: #4B020B;
-  margin-bottom: 11px;
-  cursor: default;
-}
-
-.ui.inverted.menu > .brand.item {
-  font-weight: 700;
+.ui.search.dropdown .menu {
+  max-height: none;
 }
 
 .ui.segment {
