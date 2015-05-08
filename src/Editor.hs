@@ -98,7 +98,9 @@ stringToExtensions :: Component
                    -> [(String,Set Extension -> Set Extension)]
 stringToExtensions Reader "md" =
   [("Hard Line Breaks",Set.insert Ext_hard_line_breaks)
-  ,("GitHub Flavored",Set.union githubMarkdownExtensions)]
+  ,("GitHub Flavored"
+   ,Set.delete Ext_hard_line_breaks .
+    Set.union githubMarkdownExtensions)]
 stringToExtensions _ _ = []
 
 defaultExtensions :: Set Extension
