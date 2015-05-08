@@ -30,7 +30,7 @@ $ make -C markup.rocks
 ```
 
 Please note that the JavaScript file GHCJS generates as a result of this
-process includes Pandoc and will be subject to the restrictions it's license,
+process includes Pandoc and will be subject to the restrictions its license,
 [GPL version 2](https://github.com/jgm/pandoc/blob/master/COPYING), has.
 
 [github]:https://github.com/osener/markup.rocks
