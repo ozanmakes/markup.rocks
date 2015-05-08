@@ -34,10 +34,10 @@ import           Text.Pandoc
 import           Editor
 import           Formats
 import           Example
-import           LocalStorage            (getPref)
+import           LocalStorage            (getPref, setPref)
 import           Widgets.Menu
 import           Widgets.CodeMirror
-import           Widgets.Misc            (icon, iconLinkClass)
+import           Widgets.Misc            (icon, iconLinkClass, lastDoc, lastExt)
 import           Widgets.Setting
 
 #ifdef __GHCJS__
@@ -71,13 +71,15 @@ main =
                                      $(unqDyn [|value t|])|])
                result <-
                  forceLossy (updated parsed)
+               ext <- liftIO lastExt
+               doc <- liftIO lastDoc
                resCM <-
                  divClass "ui top right attached label" $
                  do let output =
                           attachDyn (_selection_value writerD) result
                     makeSaveMenu "Save"
                                  output
-                                 ("md",markdownExample)
+                                 (ext,doc)
                     (menu,resCM) <-
                       elAttr' "div"
                               ("class" =: "ui left dropdown compact icon button") $
@@ -90,7 +92,7 @@ main =
                                  (toJSString "nothing")
                     return resCM
                let initial =
-                     convertDoc "md" "1preview" githubMarkdownExtensions markdownExample
+                     convertDoc ext "1preview" githubMarkdownExtensions doc
                resultDyn <-
                  holdDyn initial result
                cmEnabled <-
@@ -129,6 +131,9 @@ main =
                                 resultDyn
                performEvent_ $
                  fmap (const . liftIO . void . forkIO $ highlightCode) result
+               performEvent_ $
+                 fmap (liftIO . void . forkIO . setPref "Last Document" . show)
+                      (updated $ value t)
 
 forceLossy :: (MonadWidget t m,NFData a)
            => Event t a -> m (Event t a)
