@@ -24,7 +24,7 @@ nix-based build environment.
 
 ```bash
 $ git clone --recursive https://github.com/osener/markup.rocks.env
-$ git clone https://github.com/osener/markup.rocks
+$ git clone --recursive https://github.com/osener/markup.rocks
 $ markup.rocks.env/activate  # this will take a while
 $ make -C markup.rocks
 ```
