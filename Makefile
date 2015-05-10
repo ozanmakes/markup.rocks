@@ -41,7 +41,7 @@ CSS=vendor/codemirror/lib/codemirror.css	\
 		static/semantic.min.css
 
 compile:
-	cd src; ghcjs --make Main.hs -DGHCJS_BROWSER
+	cd src; ghcjs --make Main.hs -DGHCJS_BROWSER -DGHCJS_BUSY_YIELD=5 -DGHCJS_SCHED_QUANTUM=5
 	cat $(CSS) static/app.css > static/style.css
 	cat $(JS) src/Main.jsexe/all.js > static/app.js
 
