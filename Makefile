@@ -66,4 +66,5 @@ clean:
 	find -L src -name "*.js*" -exec rm {} \;
 
 sync:
-	aws s3 sync dist s3://markup.rocks/ --content-encoding "gzip" --delete --acl "public-read"
+	aws s3 sync dist/static s3://markup.rocks/static --content-encoding "gzip" --delete --acl "public-read" --cache-control "public, max-age=31536000"
+	aws s3 cp dist/index.html s3://markup.rocks/index.html --content-encoding "gzip" --acl "public-read"
