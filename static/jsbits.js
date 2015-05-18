@@ -21,6 +21,19 @@
     return cm;
   };
 
+  window.insertSpaces = function (cm, enabled) {
+    if (enabled) {
+      cm.setOption("extraKeys", {
+        Tab: function(cm) {
+          var spaces = Array(cm.getOption("indentUnit") + 1).join(" ");
+          cm.replaceSelection(spaces);
+        }
+      });
+    } else {
+      cm.setOption("extraKeys", {});
+    }
+  };
+
   window.dropdownOnChange = function (el, cb) {
     $(el).dropdown({ onChange: cb });
   };

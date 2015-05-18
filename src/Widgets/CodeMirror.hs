@@ -35,6 +35,7 @@ JS(newCodeMirror_, "fromTextArea($1, $2)", HTMLTextAreaElement -> JSFun (JSStrin
 JS(toTextArea, "$1['toTextArea']()", CodeMirrorObj -> IO ())
 JS(setMode, "$1['setOption']('mode', $2)", CodeMirrorObj -> JSString -> IO ())
 JS(setContent, "$1['setValue']($2)", CodeMirrorObj -> JSString -> IO ())
+JS(insertSpaces, "insertSpaces($1, $2)", CodeMirrorObj -> Bool -> IO ())
 
 newCodeMirrorObj :: HTMLTextAreaElement -> (String -> IO ()) -> IO CodeMirrorObj
 newCodeMirrorObj textarea onChange =
@@ -49,6 +50,7 @@ data CodeMirrorConfig t =
   CodeMirrorConfig {_codeMirrorConfig_initialValue :: String
                    ,_codeMirrorConfig_enabled :: Bool
                    ,_codeMirrorConfig_enableCodeMirror :: Event t Bool
+                   ,_codeMirrorConfig_insertSpaces :: Event t Bool
                    ,_codeMirrorConfig_changeLang :: Event t String
                    ,_codeMirrorConfig_setValue :: Event t String
                    ,_codeMirrorConfig_attributes :: Dynamic t (Map String String)}
@@ -58,6 +60,7 @@ instance Reflex t => Default (CodeMirrorConfig t) where
     CodeMirrorConfig {_codeMirrorConfig_initialValue = ""
                      ,_codeMirrorConfig_enabled = True
                      ,_codeMirrorConfig_enableCodeMirror = never
+                     ,_codeMirrorConfig_insertSpaces = never
                      ,_codeMirrorConfig_changeLang = never
                      ,_codeMirrorConfig_setValue = never
                      ,_codeMirrorConfig_attributes = constDyn mempty}
@@ -71,7 +74,7 @@ instance HasValue (CodeMirror t) where
 
 codeMirror :: MonadWidget t m
            => CodeMirrorConfig t -> m (CodeMirror t)
-codeMirror (CodeMirrorConfig initial enabled eCM eLang eSet attrs) =
+codeMirror (CodeMirrorConfig initial enabled eCM eSp eLang eSet attrs) =
   do e <-
        liftM castToHTMLTextAreaElement $
        buildEmptyElement "textarea" =<<
@@ -89,20 +92,31 @@ codeMirror (CodeMirrorConfig initial enabled eCM eLang eSet attrs) =
        liftIO $
        do htmlTextAreaElementSetValue e initial
           if enabled
-             then newCodeMirrorObj e onChange >>= newMVar
+             then newCodeMirrorObj e onChange >>=
+                  newMVar
              else newEmptyMVar
      performEvent_ $
        fmap (\v ->
                liftIO $
                do maybeCodeMirror <- tryTakeMVar mvar
-                  case (v, maybeCodeMirror) of
-                    (False, Just cm) -> toTextArea cm
-                    (True, Nothing) ->
+                  case (v,maybeCodeMirror) of
+                    (False,Just cm) -> toTextArea cm
+                    (True,Nothing) ->
                       do cm <-
                            newCodeMirrorObj e onChange
                          putMVar mvar cm
                     otherwise -> return ())
             eCM
+     performEvent_ $
+       fmap (\v ->
+               liftIO $
+               do maybeCodeMirror <- tryTakeMVar mvar
+                  case (v,maybeCodeMirror) of
+                    (enabled,Just cm) ->
+                      do insertSpaces cm enabled
+                         putMVar mvar cm
+                    otherwise -> return ())
+            eSp
      performEvent_ $
        fmap (\v ->
                liftIO $

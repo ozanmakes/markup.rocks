@@ -42,27 +42,13 @@ editor =
                            (findWithDefault "Markdown" ext resultFormats)
                            (constDyn sourceFormats)
                            (leftmost [locationExt,dropboxExt, fileExt])
-         (advancedEditor,exts,(dropboxContents,dropboxExt)) <-
+         ((advancedEditor,insertSp,exts), (dropboxContents,dropboxExt)) <-
            divClass "ui top right attached label" $
            do dbox <- openMenu openFileModal locationModal
               let input = attachDyn (_selection_value d) (updated $ value t)
               makeSaveMenu "Save" input (ext,doc)
-              (menu,children) <-
-                elAttr' "div" ("class" =: "ui left dropdown compact icon button")  $
-                do icon "settings"
-                   divClass "menu" $
-                     do divClass "header" (text "Source Settings")
-                        advancedEditor <-
-                          divClass "item" $
-                          setting "CodeMirror Editor" True
-                        divClass "header" (text "Markdown")
-                        exts <-
-                          extensions Reader "md"
-                        return (advancedEditor,exts,dbox)
-              liftIO $
-                enableMenu (_el_element menu)
-                           (toJSString "nothing")
-              return children
+              s <- settings
+              return (s, dbox)
          cmEnabled <-
            liftIO $
            getPref "CodeMirror Editor" True
@@ -71,12 +57,39 @@ editor =
              def {_codeMirrorConfig_initialValue = doc
                  ,_codeMirrorConfig_enabled = cmEnabled
                  ,_codeMirrorConfig_enableCodeMirror =
-                    updated (_setting_value advancedEditor)
+                    updated advancedEditor
+                 ,_codeMirrorConfig_insertSpaces =
+                    updated insertSp
                  ,_codeMirrorConfig_changeLang =
-                    updated (_selection_value d)
+                    updated (value d)
                  ,_codeMirrorConfig_setValue =
                     leftmost [locationContents,dropboxContents, fileContents]}
      return (d,t,exts)
+
+settings :: (MonadWidget t m)
+         => m (Dynamic t Bool, Dynamic t Bool, Dynamic t (Set Extension))
+settings =
+  do (menu,children) <-
+       elAttr' "div" ("class" =: "ui left dropdown compact icon button") $
+       do icon "settings"
+          divClass "menu" $
+            do divClass "header" (text "Source Settings")
+               (advancedEditor,insertSp) <-
+                 divClass "item" $
+                 do advancedEditor <-
+                      setting "CodeMirror Editor" True
+                    insertSp <-
+                      divClass "left menu" $
+                      do divClass "item" $
+                           setting "Use spaces for indentation" False
+                    return ((value advancedEditor),(value insertSp))
+               divClass "header" (text "Markdown")
+               exts <- extensions Reader "md"
+               return (advancedEditor,insertSp,exts)
+     liftIO $
+       enableMenu (_el_element menu)
+                  (toJSString "nothing")
+     return children
 
 extensions :: (MonadWidget t m)
            => Component -> String -> m (Dynamic t (Set Extension))

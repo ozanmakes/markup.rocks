@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs            #-}
 {-# LANGUAGE TemplateHaskell  #-}
+{-# LANGUAGE TypeFamilies     #-}
 
 module Widgets.Setting where
 
@@ -143,3 +144,11 @@ selection (SelectionConfig k0 labelText options eSet) =
        holdDyn (Just k0)
                (leftmost [fmap Just eSet,eRecv])
      return (Selection dValue never)
+
+instance HasValue (Setting t) where
+  type Value (Setting t) = Dynamic t Bool
+  value = _setting_value
+
+instance HasValue (Selection t) where
+  type Value (Selection t) = Dynamic t String
+  value = _selection_value
