@@ -11,7 +11,7 @@ import           Data.Dependent.Map     (DSum (..))
 import           Data.Maybe             (fromMaybe, isJust)
 import           Data.Monoid            ((<>))
 import           Data.Text              (unpack)
-import           GHCJS.DOM.HTMLElement
+import           GHCJS.DOM.Element
 import           GHCJS.Foreign
 import           GHCJS.Types
 import           Network.URI            (isAbsoluteURI)
@@ -32,7 +32,7 @@ import           Widgets.Setting
 #define JS(name, js, type) name :: type ; name = undefined
 #endif
 
-JS(dropboxOpen,"dropboxOpen($1, $2)", HTMLElement -> JSFun (JSString -> IO ()) -> IO ())
+JS(dropboxOpen,"dropboxOpen($1, $2)", Element -> JSFun (JSString -> IO ()) -> IO ())
 JS(hideModal,"jQuery('.modal.active')['modal']('hide')",IO ())
 
 locationDialog :: MonadWidget t m => m (El t, (Event t String, Event t String))

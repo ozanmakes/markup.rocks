@@ -6,7 +6,7 @@ module Widgets.Menu where
 import           Control.Concurrent
 import           Control.Monad
 import           Control.Monad.IO.Class
-import           GHCJS.DOM.HTMLElement
+import           GHCJS.DOM.Element
 import           GHCJS.Foreign
 import           GHCJS.Types
 import           LocalStorage            (getPref)
@@ -27,8 +27,8 @@ import           Widgets.Misc            (icon, iconLinkClass)
 
 JS(fileSave,"fileSave($1, $2)", JSString -> JSString -> IO ())
 JS(dropboxSave,"dropboxSave($1, $2)", JSString -> JSString -> IO ())
-JS(enableMenu,"enableMenu($1, $2)", HTMLElement -> JSString -> IO ())
-JS(showModal,"jQuery($1)['modal']('show')",HTMLElement -> IO ())
+JS(enableMenu,"enableMenu($1, $2)", Element -> JSString -> IO ())
+JS(showModal,"jQuery($1)['modal']('show')",Element -> IO ())
 
 openMenu :: (MonadWidget t m)
          => El t -> El t -> m (Event t String,Event t String)

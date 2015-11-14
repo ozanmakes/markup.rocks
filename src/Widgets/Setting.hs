@@ -18,7 +18,7 @@ import           Data.Maybe
 import           Data.Monoid                 ((<>))
 import           GHCJS.DOM
 import           GHCJS.DOM.Element
-import           GHCJS.DOM.HTMLElement
+import           GHCJS.DOM.Element
 import           GHCJS.DOM.HTMLInputElement
 import           GHCJS.DOM.HTMLLabelElement
 import           GHCJS.DOM.HTMLSelectElement
@@ -42,9 +42,9 @@ import           Widgets.Misc                (icon)
 #define JS(name, js, type) name :: type ; name = undefined
 #endif
 
-JS(makeCheckbox, "jQuery($1)['checkbox']()", HTMLElement -> IO ())
-JS(makeDropdown, "dropdownOnChange($1, $2)", HTMLElement -> JSFun (JSString -> IO ()) -> IO ())
-JS(dropdownSetValue,"jQuery($1)['dropdown']('set text', $2)", HTMLElement -> JSString -> IO ())
+JS(makeCheckbox, "jQuery($1)['checkbox']()", Element -> IO ())
+JS(makeDropdown, "dropdownOnChange($1, $2)", Element -> JSFun (JSString -> IO ()) -> IO ())
+JS(dropdownSetValue,"jQuery($1)['dropdown']('set text', $2)", Element -> JSString -> IO ())
 
 data Setting t =
   Setting {_setting_value :: Dynamic t Bool}
