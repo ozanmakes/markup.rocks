@@ -113,6 +113,7 @@ stringToExtensions Reader "md" =
   [("Hard Line Breaks",Set.insert Ext_hard_line_breaks)
   ,("GitHub Flavored"
    ,Set.delete Ext_hard_line_breaks .
+    Set.delete Ext_emoji .
     Set.union githubMarkdownExtensions)]
 stringToExtensions _ _ = []
 
