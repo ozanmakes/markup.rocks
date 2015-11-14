@@ -19,6 +19,10 @@ textarea.input, .CodeMirror.cm-s-neo, .output, .outputCM {
   max-height: none;
 }
 
+.ui.search.dropdown:not(.active) > .text {
+  cursor: pointer;
+}
+
 .ui.segment {
   width: 100%;
   height: 100%;
