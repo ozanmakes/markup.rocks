@@ -72,6 +72,10 @@ textarea.input, .CodeMirror.cm-s-neo, .output, .outputCM {
   transform: rotate(180deg) translateY(-2px);
 }
 
+.ui.dropdown.button:focus, .ui.dropdown.button:active {
+  box-shadow: none !important;
+}
+
 code, .CodeMirror, textarea {
   font-family: "Droid Sans Mono", monospace;
 }
