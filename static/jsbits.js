@@ -45,7 +45,7 @@
   };
 
   window.enableMenu = function (el, action) {
-    $(el).dropdown({on: 'hover', action: action});
+    $(el).dropdown({on: 'click', action: action});
   };
 
   window.dropboxOpen =  function (el, cb) {
