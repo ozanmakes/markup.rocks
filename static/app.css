@@ -6,8 +6,12 @@ body {
   margin-top: 18px;
 }
 
-textarea.input, .CodeMirror.cm-s-neo, .output, .outputCM {
-  width: 100%;
+textarea.input, .CodeMirror.cm-s-neo, .output {
+  width: 101%;
+  height: 98%;
+}
+
+.outputCM {
   height: 98%;
 }
 
