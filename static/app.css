@@ -63,6 +63,15 @@ textarea.input, .CodeMirror.cm-s-neo, .output, .outputCM {
   margin-top: -7px;
 }
 
+.ui.dropdown .dropdown.icon {
+  transform: translateY(2px);
+  transition: transform .1s linear;
+}
+
+.ui.dropdown.active .dropdown.icon {
+  transform: rotate(180deg) translateY(-2px);
+}
+
 code, .CodeMirror, textarea {
   font-family: "Droid Sans Mono", monospace;
 }
