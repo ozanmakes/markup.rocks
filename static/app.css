@@ -90,6 +90,7 @@ textarea {
   margin-left:-2px;
   background-color: transparent;
   outline: none;
+  resize: none;
 }
 
 .ui.top.attached.label {
