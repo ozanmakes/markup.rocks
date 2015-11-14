@@ -1,3 +1,6 @@
+.PHONY: js css compile compress clean sync
+.DEFAULT_GOAL := compile
+
 GZIP=zopfli -c -i1000
 # GZIP=gzip -c
 FONTS=static/themes/default/assets/fonts
@@ -40,10 +43,14 @@ CSS=vendor/codemirror/lib/codemirror.css  \
     static/hljs-theme.css                 \
     static/semantic.min.css
 
-compile:
+js:
 	cd src; ghcjs --make Main.hs -DGHCJS_BROWSER -DGHCJS_BUSY_YIELD=5 -DGHCJS_SCHED_QUANTUM=5
-	cat $(CSS) static/app.css > static/style.css
 	cat $(JS) src/Main.jsexe/all.js > static/app.js
+
+css:
+	cat $(CSS) static/app.css > static/style.css
+
+compile: js css
 
 compress:
 	mkdir -p dist/$(FONTS) dist/static/icon
