@@ -15,7 +15,7 @@ iconLinkClass i s c =
        elAttr' "a" ("class" =: c) $
        do icon i
           text s
-     return $ _el_clicked l
+     return $ domEvent Click l
 
 icon :: MonadWidget t m => String -> m ()
 icon i = elClass "i" (i ++ " icon") (return ())
