@@ -1,5 +1,10 @@
 body {
   padding: 7px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .CodeMirror.cm-s-neo, textarea.input, .output {
@@ -38,6 +43,11 @@ textarea.input, .CodeMirror.cm-s-neo, .output {
   height: 100%;
   font-size: 16px;
 
+  -webkit-touch-callout: text;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
 }
 
 .output > textarea {
